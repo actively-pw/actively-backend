@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Actively.Controllers.Repositories.Interfaces;
+using Actively.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers
 {
@@ -6,9 +8,16 @@ namespace Actively.Controllers
 	[ApiController]
 	public class ActivityController : Controller
 	{
-		public IActionResult Index()
+		private readonly IActivityRepository _activityRepository;
+		public ActivityController(IActivityRepository activityRepository)
 		{
-			return View();
+			_activityRepository = activityRepository;
+		}
+
+		[HttpGet("activitiesByUser/{userId}")]
+		public List<Activity> GetActivitiesByUser(Guid userId)
+		{
+			return _activityRepository.GetActivitiesByUser(userId);
 		}
 	}
 }

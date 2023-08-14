@@ -1,4 +1,6 @@
 using Actively.Context;
+using Actively.Controllers.Repositories;
+using Actively.Controllers.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +12,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ActivelyDbContext>(options =>
-		options.UseSqlServer(builder.Configuration["ConnectionStrings:DbConnectionString"]));
+builder.Services
+	.AddDbContext<ActivelyDbContext>(options =>
+		options.UseSqlServer(builder.Configuration["ConnectionStrings:DbConnectionString"]))
+	.AddScoped<IActivityRepository, ActivityRepository>();
 
 var app = builder.Build();
 
