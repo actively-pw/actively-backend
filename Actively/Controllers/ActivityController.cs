@@ -1,5 +1,5 @@
 ﻿using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
+using Actively.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers
@@ -14,10 +14,21 @@ namespace Actively.Controllers
 			_activityRepository = activityRepository;
 		}
 
-		[HttpGet("activitiesByUser/{userId}")]
-		public List<Activity> GetActivitiesByUser(Guid userId)
+		[HttpGet("")]
+		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities()
 		{
-			return _activityRepository.GetActivitiesByUser(userId);
+			try
+			{
+				var activities = await _activityRepository.GetAllActivities();
+				var enumerable = activities.ToList();
+				if (!enumerable.Any()) return NotFound();
+				var activitiesList = enumerable.Select(a => new GetActivityDto(a));
+				return Ok(activitiesList);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to get Activities: {ex.Message}");
+			}
 		}
 	}
 }

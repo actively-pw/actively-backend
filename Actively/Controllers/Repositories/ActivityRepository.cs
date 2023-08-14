@@ -12,9 +12,10 @@ namespace Actively.Controllers.Repositories
 		{
 			_context = context;
 		}
-		public List<Activity> GetActivitiesByUser(Guid userId)
+		public async Task<List<Activity>> GetAllActivities()
 		{
-			return new List<Activity>();
+			return await _context.Activities
+				.ToListAsync();
 		}
 	}
 }

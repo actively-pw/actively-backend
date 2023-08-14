@@ -4,6 +4,7 @@ using Actively.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Actively.Migrations
 {
     [DbContext(typeof(ActivelyDbContext))]
-    partial class ActivelyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230814145010_AddUsersTable")]
+    partial class AddUsersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,12 +31,6 @@ namespace Actively.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AverageSpeed")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Distance")
-                        .HasColumnType("float");
-
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
@@ -41,13 +38,15 @@ namespace Actively.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TotalTime")
-                        .HasColumnType("int");
-
                     b.Property<byte>("Type")
                         .HasColumnType("tinyint");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Activities");
                 });
@@ -77,6 +76,17 @@ namespace Actively.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Actively.Models.Activity", b =>
+                {
+                    b.HasOne("Actively.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
