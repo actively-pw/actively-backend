@@ -15,7 +15,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet("")]
-		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities()
+		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromQuery] PaginationParams @params)
 		{
 			try
 			{
