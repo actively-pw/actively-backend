@@ -16,9 +16,7 @@ namespace Actively.Models.DTOs
 			Title = activity.Title;
 			Type = activity.Type;
 			Start = activity.Start;
-			Stats.TotalTime = activity.TotalTime;
-			Stats.Distance = activity.Distance;
-			Stats.AverageSpeed = activity.AverageSpeed;
+			Stats = new Stats(activity.TotalTime, activity.Distance, activity.AverageSpeed);
 			RouteUrl = "tu powinno byc route url";
 		}
 	}
