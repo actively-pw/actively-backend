@@ -15,7 +15,7 @@ namespace Actively.BlobStorage
 
 		private BlobClient CreateBlob(Guid activityId)
 		{
-			var blobName = activityId + ".txt"; //geojson
+			var blobName = activityId + ".geojson";
 			var containerClient = new BlobContainerClient(_connectionString, _geojsonRoutesContainerName);
 			containerClient.CreateIfNotExistsAsync();
 			return containerClient.GetBlobClient(blobName);
