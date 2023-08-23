@@ -1,5 +1,4 @@
 ﻿using Azure.Storage.Blobs;
-using System.Runtime.CompilerServices;
 
 namespace Actively.BlobStorage
 {
@@ -10,7 +9,7 @@ namespace Actively.BlobStorage
 
 		public StorageManager(IConfiguration configuration)
 		{
-			_connectionString = configuration.GetSection("ConnectionStrings").GetValue<string>("AzureBlobConnectionString");
+			_connectionString = configuration.GetSection("ConnectionStrings").GetValue<string>("AzureBlob");
 		}
 
 		private BlobClient CreateBlob(Guid activityId)

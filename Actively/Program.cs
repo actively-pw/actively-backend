@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
-		options.UseSqlServer(builder.Configuration["ConnectionStrings:DbConnectionString"]))
+		options.UseSqlServer(builder.Configuration.GetConnectionString("DbDev")))
 	.AddScoped<IActivityRepository, ActivityRepository>()
 	.AddScoped<StorageManager>()
 	.AddScoped<GeoJsonGenerator>();
