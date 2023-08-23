@@ -1,3 +1,4 @@
+using Actively.BlobStorage;
 using Actively.Context;
 using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
@@ -15,7 +16,8 @@ builder.Services.AddSwaggerGen();
 builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
 		options.UseSqlServer(builder.Configuration["ConnectionStrings:DbConnectionString"]))
-	.AddScoped<IActivityRepository, ActivityRepository>();
+	.AddScoped<IActivityRepository, ActivityRepository>()
+	.AddScoped<StorageManager>();
 
 var app = builder.Build();
 

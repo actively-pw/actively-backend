@@ -6,7 +6,7 @@ namespace Actively.Models.DTOs
 	{
 		public Guid Id { get; set;}
 		public string Title { get; set;}
-		public ActivityType Type { get; set;}
+		public Sport Sport { get; set;}
 		public DateTime Start { get; set;}
 		public Stats Stats { get; set;}
 		public string RouteUrl { get; set;}
@@ -14,7 +14,7 @@ namespace Actively.Models.DTOs
 		{
 			Id = activity.Id;
 			Title = activity.Title;
-			Type = activity.Type;
+			Sport = activity.Sport;
 			Start = activity.Start;
 			Stats = new Stats(activity.TotalTime, activity.Distance, activity.AverageSpeed);
 			RouteUrl = "tu powinno byc route url";

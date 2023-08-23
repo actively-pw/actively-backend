@@ -1,7 +1,9 @@
-﻿using Actively.Controllers.Repositories.Interfaces;
+﻿using Actively.BlobStorage;
+using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace Actively.Controllers
 {
@@ -10,9 +12,11 @@ namespace Actively.Controllers
 	public class ActivityController : Controller
 	{
 		private readonly IActivityRepository _activityRepository;
-		public ActivityController(IActivityRepository activityRepository)
+		private readonly StorageManager _blobStorage;
+		public ActivityController(IActivityRepository activityRepository, StorageManager blobStorage)
 		{
 			_activityRepository = activityRepository;
+			_blobStorage = blobStorage;
 		}
 
 		[HttpGet]
@@ -38,6 +42,14 @@ namespace Actively.Controllers
 			try
 			{
 				var result = await _activityRepository.AddActivity(addActivityDto);
+
+				// to do: generate geojson file
+
+				// and upload it to blob storage
+				byte[] bytes = Encoding.ASCII.GetBytes("hello");
+
+				await _blobStorage.Upload(addActivityDto.Id, new MemoryStream(bytes));
+
 				return Ok(result);
 			}
 			catch (Exception ex)

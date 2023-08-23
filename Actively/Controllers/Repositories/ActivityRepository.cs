@@ -23,16 +23,13 @@ namespace Actively.Controllers.Repositories
 
 		public async Task<Activity> AddActivity(AddActivityDto addActivityDto)
 		{
-			var activity = new Activity(
-				addActivityDto.Title,
-				addActivityDto.Type,
-				addActivityDto.Start,
-				addActivityDto.Stats.TotalTime,
-				addActivityDto.Stats.Distance,
-				addActivityDto.Stats.AverageSpeed);
+			var activity = new Activity(addActivityDto);
 
 			await _context.Activities.AddAsync(activity);
 			await _context.SaveChangesAsync();
+
+			// generate geojson file and add it to blob storage
+
 			return activity;
 		}
 	}

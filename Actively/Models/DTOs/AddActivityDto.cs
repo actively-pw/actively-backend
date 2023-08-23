@@ -5,30 +5,35 @@ namespace Actively.Models.DTOs
 	public class AddActivityDto
 	{
 		public Guid Id { get; set; }
-		public string Title { get; set; } = "";
-		public ActivityType Type { get; set; }
-		public DateTime Start { get; set; }
+		public string? Title { get; set; }
+		public Sport Sport { get; set; }
 		public Stats Stats { get; set; }
-		public CoordsWithTimestamps[] Coordinates { get; set; }
+		public RouteSlice[] Route { get; set; }
 	}
 	public class Stats
 	{
-		public int TotalTime { get; set; } // milliseconds
+		public int Duration { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
 
-		public Stats(int totalTime, double distance, double averageSpeed)
+		public Stats(int duration, double distance, double averageSpeed)
 		{
-			TotalTime = totalTime;
+			Duration = duration;
 			Distance = distance;
 			AverageSpeed = averageSpeed;
 		}
 	}
 
-	public class CoordsWithTimestamps
+	public class RouteSlice
 	{
-		public double X { get; set; }
-		public double Y { get; set; }
-		public DateTime Timestamp { get; set; }
+		public DateTime Start { get; set; }
+		public Location[] Locations { get; set; }
+	}
+
+	public class Location
+	{
+		public DateTime TimeStamp { get; set; }
+		public double Latitude{ get; set; }
+		public double Longitude { get; set; }
 	}
 }

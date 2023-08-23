@@ -1,6 +1,6 @@
 ﻿namespace Actively.Models.Enums
 {
-	public enum ActivityType : byte
+	public enum Sport : byte
 	{
 		Run = 0,
 		BicycleRide = 1
