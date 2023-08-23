@@ -2,8 +2,8 @@
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Services.GeoJsonGenerator;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 
 namespace Actively.Controllers
 {
@@ -13,10 +13,12 @@ namespace Actively.Controllers
 	{
 		private readonly IActivityRepository _activityRepository;
 		private readonly StorageManager _blobStorage;
-		public ActivityController(IActivityRepository activityRepository, StorageManager blobStorage)
+		private readonly GeoJsonGenerator _geoJsonGenerator;
+		public ActivityController(IActivityRepository activityRepository, StorageManager blobStorage, GeoJsonGenerator geoJsonGenerator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
+			_geoJsonGenerator = geoJsonGenerator;
 		}
 
 		[HttpGet]
@@ -41,14 +43,17 @@ namespace Actively.Controllers
 		{
 			try
 			{
+				if (await _activityRepository.GetActivityById(addActivityDto.Id) is not null)
+				{
+					return BadRequest("Activity with this id already exists.");
+				}
+
 				var result = await _activityRepository.AddActivity(addActivityDto);
 
-				// to do: generate geojson file
-
-				// and upload it to blob storage
-				byte[] bytes = Encoding.ASCII.GetBytes("hello");
-
-				await _blobStorage.Upload(addActivityDto.Id, new MemoryStream(bytes));
+				using(var geojson = _geoJsonGenerator.Generate(addActivityDto))
+				{
+					await _blobStorage.Upload(addActivityDto.Id, geojson);
+				}
 
 				return Ok(result);
 			}

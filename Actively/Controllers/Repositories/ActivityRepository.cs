@@ -17,8 +17,7 @@ namespace Actively.Controllers.Repositories
 
 		public async Task<List<Activity>> GetAllActivities()
 		{
-			return await _context.Activities
-				.ToListAsync();
+			return await _context.Activities.ToListAsync();
 		}
 
 		public async Task<Activity> AddActivity(AddActivityDto addActivityDto)
@@ -26,11 +25,15 @@ namespace Actively.Controllers.Repositories
 			var activity = new Activity(addActivityDto);
 
 			await _context.Activities.AddAsync(activity);
+
 			await _context.SaveChangesAsync();
 
-			// generate geojson file and add it to blob storage
-
 			return activity;
+		}
+
+		public async Task<Activity?> GetActivityById(Guid id)
+		{
+			return await _context.Activities.FirstOrDefaultAsync(p => p.Id == id);
 		}
 	}
 }
