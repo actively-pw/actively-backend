@@ -10,7 +10,7 @@ namespace Actively.BlobStorage
 
 		public StorageManager(IConfiguration configuration)
 		{
-			_connectionString = configuration.GetSection("ConnectionStrings:AzureBlob").Value!;
+			_connectionString = configuration.GetSection("AzureBlob").Value!;
 		}
 
 		private BlobClient CreateBlob(Guid activityId)

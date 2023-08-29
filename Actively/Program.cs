@@ -16,18 +16,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TODO:
+builder.Configuration.AddAzureKeyVault(
+	new Uri(builder.Configuration.GetSection("KeyVaultUrl").Value!),
+	new DefaultAzureCredential()
+	);
+
 builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
-		options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:DbDev").Value!))
+		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.AddScoped<IActivityRepository, ActivityRepository>()
 	.AddScoped<StorageManager>()
 	.AddScoped<GeoJsonGenerator>();
-
-// TODO:
-//builder.Configuration.AddAzureKeyVault(
-//	new Uri(builder.Configuration.GetSection("KeyVaultUrl").Value!),
-//	new DefaultAzureCredential()
-//	);
 
 var app = builder.Build();
 
