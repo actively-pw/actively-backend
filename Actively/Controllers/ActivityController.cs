@@ -62,5 +62,27 @@ namespace Actively.Controllers
 				return BadRequest($"Failed to add new activity. Exception {ex.Message}");
 			}
 		}
+
+		[HttpDelete("{id}")]
+		public async Task<ActionResult<Activity>> DeleteActivity(Guid id)
+		{
+			try
+			{
+
+				await _blobStorage.Delete(id); // delete route file from blob storage
+
+				var result = await _activityRepository.DeleteActivity(id); // delete activity from db
+
+				return result;
+			}
+			catch (KeyNotFoundException ex)
+			{
+				return NotFound($"Exception: {ex.Message}");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to delete activity with id {id}. Exception {ex.Message}");
+			}
+		}
 	}
 }

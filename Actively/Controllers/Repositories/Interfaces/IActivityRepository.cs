@@ -8,5 +8,6 @@ namespace Actively.Controllers.Repositories.Interfaces
 		Task<List<Activity>> GetAllActivities();
 		Task<Activity> AddActivity(AddActivityDto addActivityDto);
 		Task<Activity?> GetActivityById(Guid id);
+		Task<Activity> DeleteActivity(Guid id); 
 	}
 }
