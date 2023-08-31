@@ -3,15 +3,20 @@ using Actively.Context;
 using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Services.GeoJsonGenerator;
+using Actively.Services.InputFormatters;
 using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+	options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 builder.Configuration.AddAzureKeyVault(
 	new Uri(builder.Configuration.GetSection("KeyVaultUrl").Value!),

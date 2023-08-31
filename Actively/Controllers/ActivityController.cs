@@ -3,7 +3,10 @@ using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Actively.Controllers
 {
@@ -82,6 +85,23 @@ namespace Actively.Controllers
 			catch (Exception ex)
 			{
 				return BadRequest($"Failed to delete activity with id {id}. Exception {ex.Message}");
+			}
+		}
+		[HttpPatch("{id}")]
+		public async Task<ActionResult<Activity>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
+		{
+			try
+			{
+				var result = await _activityRepository.EditActivity(id, patchDoc);
+				return Ok(result);
+			}
+			catch (KeyNotFoundException ex)
+			{
+				return NotFound($"Exception: {ex.Message}");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to edit activity with id {id}. Exception {ex.Message}");
 			}
 		}
 	}

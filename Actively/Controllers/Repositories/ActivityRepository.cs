@@ -2,6 +2,9 @@
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Actively.Controllers.Repositories
@@ -39,6 +42,37 @@ namespace Actively.Controllers.Repositories
 			if (result is null) throw new KeyNotFoundException("Activity with given id does not exist.");
 			_context.Activities.Remove(result);
 			await _context.SaveChangesAsync();
+			return result;
+		}
+
+		public async Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
+		{
+			var result = await _context.Activities.SingleOrDefaultAsync(e => e.Id == id);
+
+			if (result is null) throw new KeyNotFoundException("Activity with given id does not exist.");
+
+			foreach (var operation in patchDoc.Operations) // check if all changes are valid
+			{
+				if (operation.OperationType != OperationType.Replace)
+				{
+					throw new ArgumentException("Invalid operation - only Replace operations are allowed.");
+				}
+
+				if (operation.path.Contains("id") || operation.path.Contains("Id"))
+				{
+					throw new ArgumentException("Invalid operation - cannot modify identificators.");
+				}
+
+				if(!operation.path.Contains("Title") && !operation.path.Contains("title"))
+				{
+					throw new ArgumentException("Invalid operation - only Title can be modified (at least for now).");
+				}
+			}
+
+			patchDoc.ApplyTo(result);
+
+			await _context.SaveChangesAsync();
+
 			return result;
 		}
 	}
