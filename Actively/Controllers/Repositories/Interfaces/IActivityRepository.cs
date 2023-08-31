@@ -1,5 +1,7 @@
 ﻿using Actively.Models;
 using Actively.Models.DTOs;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers.Repositories.Interfaces
 {
@@ -8,5 +10,7 @@ namespace Actively.Controllers.Repositories.Interfaces
 		Task<List<Activity>> GetAllActivities();
 		Task<Activity> AddActivity(AddActivityDto addActivityDto);
 		Task<Activity?> GetActivityById(Guid id);
+		Task<Activity> DeleteActivity(Guid id);
+		Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc);
 	}
 }

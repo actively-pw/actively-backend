@@ -1,5 +1,4 @@
 ﻿using Azure.Storage.Blobs;
-using Microsoft.Extensions.Configuration;
 
 namespace Actively.BlobStorage
 {
@@ -27,6 +26,14 @@ namespace Actively.BlobStorage
 			var blob = CreateBlob(activityId);
 			content.Position = 0;
 			await blob.UploadAsync(content);
+		}
+
+		public async Task Delete(Guid activityId)
+		{
+			var blobName = activityId + ".geojson";
+			var containerClient = new BlobContainerClient(_connectionString, _geojsonRoutesContainerName);
+			var blob = containerClient.GetBlobClient(blobName);
+			await blob.DeleteIfExistsAsync();
 		}
 
 	}

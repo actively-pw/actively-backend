@@ -17,7 +17,7 @@ namespace Actively.Models.DTOs
 			Sport = activity.Sport;
 			Start = activity.Start;
 			Stats = new Stats(activity.TotalTime, activity.Distance, activity.AverageSpeed);
-			RouteUrl = "tu powinno byc route url";
+			RouteUrl = "https://actively.blob.core.windows.net/geojson-routes/" + Id.ToString() + ".geojson";
 		}
 	}
 }
