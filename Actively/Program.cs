@@ -2,9 +2,11 @@ using Actively.BlobStorage;
 using Actively.Context;
 using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
+using Actively.Services.AuthService;
 using Actively.Services.AuthService.Configuration;
 using Actively.Services.GeoJsonGenerator;
 using Actively.Services.InputFormatters;
+using Actively.Services.PasswordHasher;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -31,10 +33,14 @@ builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
-	.AddScoped<IActivityRepository, ActivityRepository>()
-	.AddScoped<StorageManager>()
+		.AddScoped<StorageManager>()
 	.AddScoped<GeoJsonGenerator>()
-	.AddScoped<JwtConfig>();
+	.AddScoped<JwtConfig>()
+	.AddScoped<TokenService>()
+	.AddScoped<PasswordHasher>()
+	.AddScoped<IActivityRepository, ActivityRepository>()
+	.AddScoped<IUserRepository, UserRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {
