@@ -4,9 +4,11 @@ using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Services.AuthService;
 using Actively.Services.AuthService.Configuration;
+using Actively.Services.AuthService.Interfaces;
 using Actively.Services.GeoJsonGenerator;
 using Actively.Services.InputFormatters;
 using Actively.Services.PasswordHasher;
+using Actively.Services.PasswordHasher.Interfaces;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -36,8 +38,8 @@ builder.Services
 		.AddScoped<StorageManager>()
 	.AddScoped<GeoJsonGenerator>()
 	.AddScoped<JwtConfig>()
-	.AddScoped<TokenService>()
-	.AddScoped<PasswordHasher>()
+	.AddScoped<ITokenService, TokenService>()
+	.AddScoped<IPasswordHasher, PasswordHasher>()
 	.AddScoped<IActivityRepository, ActivityRepository>()
 	.AddScoped<IUserRepository, UserRepository>();
 

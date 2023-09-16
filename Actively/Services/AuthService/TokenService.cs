@@ -1,5 +1,6 @@
 ﻿using Actively.Models;
 using Actively.Services.AuthService.Configuration;
+using Actively.Services.AuthService.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace Actively.Services.AuthService
 {
-	public class TokenService
+	public class TokenService : ITokenService
 	{
 		private readonly JwtConfig _jwtConfig;
 

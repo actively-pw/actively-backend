@@ -1,7 +1,7 @@
 ﻿using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models.DTOs;
-using Actively.Services.AuthService;
-using Actively.Services.PasswordHasher;
+using Actively.Services.AuthService.Interfaces;
+using Actively.Services.PasswordHasher.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers
@@ -11,10 +11,10 @@ namespace Actively.Controllers
 	[ApiController]
 	public class UserController : Controller
 	{
-		private readonly TokenService _tokenService;
+		private readonly ITokenService _tokenService;
 		private readonly IUserRepository _userRepository;
-		private readonly PasswordHasher _passwordHasher;
-		public UserController(TokenService tokenService, IUserRepository userRepository, PasswordHasher passwordHasher)
+		private readonly IPasswordHasher _passwordHasher;
+		public UserController(ITokenService tokenService, IUserRepository userRepository, IPasswordHasher passwordHasher)
 		{
 			_tokenService = tokenService;
 			_userRepository = userRepository;

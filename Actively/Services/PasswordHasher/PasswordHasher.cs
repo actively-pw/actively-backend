@@ -1,8 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using Actively.Services.PasswordHasher.Interfaces;
+using System.Security.Cryptography;
 
 namespace Actively.Services.PasswordHasher
 {
-	public class PasswordHasher
+	public class PasswordHasher : IPasswordHasher
 	{
 		private const int _saltSize = 128 / 8;
 		private const int _keySize = 256 / 8;
