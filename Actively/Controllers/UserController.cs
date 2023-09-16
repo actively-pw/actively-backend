@@ -21,7 +21,7 @@ namespace Actively.Controllers
 			_passwordHasher = passwordHasher;
 		}
 
-		[HttpPost("registerUser")]
+		[HttpPost("register")]
 		public async Task<ActionResult> RegisterUser([FromBody] RegisterUserDto registerUserDto)
 		{
 			if(await _userRepository.GetUserByEmailAsync(registerUserDto.Email) is not null)
@@ -40,6 +40,39 @@ namespace Actively.Controllers
 				message = "User registered successfully",
 				token
 			});
+		}
+
+		[HttpPost("login")]
+		public async Task<ActionResult> LoginUser([FromBody] LoginUserDto loginUserDto)
+		{
+			var user = await _userRepository.GetUserByEmailAsync(loginUserDto.Email);
+
+			if(user is null)
+			{
+				return NotFound(
+					new
+					{
+						message = "User not found"
+					});
+			}
+
+			if(!_passwordHasher.Verify(user.Password, loginUserDto.Password))
+			{
+				return Unauthorized(
+					new
+					{
+						message = "Incorrect email or password"
+					});
+			}
+
+			var jwt = _tokenService.GenerateToken(user);
+
+			return Ok(
+				new
+				{
+					message = "Successful login",
+					token = jwt
+				});
 		}
 
 	}

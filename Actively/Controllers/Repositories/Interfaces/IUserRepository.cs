@@ -7,5 +7,6 @@ namespace Actively.Controllers.Repositories.Interfaces
 	{
 		Task<User?> GetUserByEmailAsync(string email);
 		Task<User> RegisterUserAsync(RegisterUserDto registerUserDto, string hashedPassword);
+
 	}
 }

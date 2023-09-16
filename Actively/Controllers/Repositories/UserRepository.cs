@@ -31,5 +31,6 @@ namespace Actively.Controllers.Repositories
 			await _context.SaveChangesAsync();
 			return user;
 		}
+
 	}
 }
