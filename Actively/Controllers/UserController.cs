@@ -4,6 +4,7 @@ using Actively.Services.AuthService.Interfaces;
 using Actively.Services.PasswordHasher.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace Actively.Controllers
 {
 
@@ -33,12 +34,22 @@ namespace Actively.Controllers
 
 			var user = await _userRepository.RegisterUserAsync(registerUserDto, passwordHash);
 
-			var token = _tokenService.GenerateToken(user);
+			var tokens = _tokenService.GetTokens(user, HttpContext.Connection.RemoteIpAddress.ToString());
+
+			if (tokens is null)
+			{
+				return Unauthorized(
+					new
+					{
+						message = "Failed to generate tokens"
+					});
+			}
 
 			return Ok(new
 			{
 				message = "User registered successfully",
-				token
+				jwt = tokens.Result.Jwt,
+				refreshToken = tokens.Result.RefreshToken
 			});
 		}
 
@@ -65,14 +76,25 @@ namespace Actively.Controllers
 					});
 			}
 
-			var jwt = _tokenService.GenerateToken(user);
+			var tokens = _tokenService.GetTokens(user, HttpContext.Connection.RemoteIpAddress.ToString());
+
+			if(tokens is null)
+			{
+				return Unauthorized(
+					new
+					{
+						message = "Failed to generate tokens"
+					});
+			}
 
 			return Ok(
 				new
 				{
 					message = "Successful login",
-					token = jwt
+					jwt = tokens.Result.Jwt,
+					refreshToken = tokens.Result.RefreshToken
 				});
+			;
 		}
 
 	}
