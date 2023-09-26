@@ -75,5 +75,10 @@ namespace Actively.Controllers.Repositories
 
 			return result;
 		}
+
+		public int GetActivitiesCount()
+		{
+			return _context.Activities.Count();
+		}
 	}
 }
