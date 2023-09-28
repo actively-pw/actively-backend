@@ -49,6 +49,12 @@ namespace Actively.Services.AuthService
 			};
 		}
 
+		public JwtSecurityToken GetJwt(string token)
+		{
+			JwtSecurityTokenHandler tokenHander = new JwtSecurityTokenHandler();
+			return tokenHander.ReadJwtToken(token);
+		}
+
 		private string GenerateJwt(User user)
 		{
 			var tokenHandler = new JwtSecurityTokenHandler();

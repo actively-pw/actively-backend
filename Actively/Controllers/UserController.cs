@@ -97,5 +97,22 @@ namespace Actively.Controllers
 			;
 		}
 
+		[HttpPost("refreshToken")]
+		public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+		{
+			if(!ModelState.IsValid)
+			{
+				return BadRequest(
+					new
+					{
+						message = "Tokens must be provided"
+					});
+			}
+
+			var token = _tokenService.GetJwt(refreshTokenDto.ExpiredToken);
+
+
+		}
+
 	}
 }
