@@ -19,7 +19,7 @@ namespace Actively.Models
 		{
 			get
 			{
-				return ExpirationDate < DateTime.Now;
+				return ExpirationDate > DateTime.Now;
 			}
 		}
 		public string IpAddress { get; set; }

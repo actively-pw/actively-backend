@@ -14,11 +14,13 @@ namespace Actively.Controllers
 	{
 		private readonly ITokenService _tokenService;
 		private readonly IUserRepository _userRepository;
+		private readonly IRefreshTokenRepository _refreshTokenRepository;
 		private readonly IPasswordHasher _passwordHasher;
-		public UserController(ITokenService tokenService, IUserRepository userRepository, IPasswordHasher passwordHasher)
+		public UserController(ITokenService tokenService, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IPasswordHasher passwordHasher)
 		{
 			_tokenService = tokenService;
 			_userRepository = userRepository;
+			_refreshTokenRepository = refreshTokenRepository;
 			_passwordHasher = passwordHasher;
 		}
 
@@ -98,7 +100,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpPost("refreshToken")]
-		public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+		public async Task<ActionResult> RefreshToken([FromBody] TokensDto tokensDto)
 		{
 			if(!ModelState.IsValid)
 			{
@@ -109,9 +111,27 @@ namespace Actively.Controllers
 					});
 			}
 
-			var token = _tokenService.GetJwt(refreshTokenDto.ExpiredToken);
+			var jwt = _tokenService.GetJwt(tokensDto.Jwt);
 
+			var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString();
 
+			try
+			{
+				var oldRefreshToken = await _refreshTokenRepository.InvalidateRefreshTokenAsync(ipAddress, jwt, tokensDto);
+				var newTokens = _tokenService.GetTokens(oldRefreshToken.User, ipAddress);
+
+				return Ok(
+					new
+					{
+						message = "Successfully refreshed tokens",
+						jwt = newTokens.Result.Jwt,
+						refreshToken = newTokens.Result.RefreshToken
+					});
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to refresh token: {ex.Message}");
+			}
 		}
 
 	}

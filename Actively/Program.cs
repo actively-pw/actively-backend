@@ -41,7 +41,8 @@ builder.Services
 	.AddScoped<ITokenService, TokenService>()
 	.AddScoped<IPasswordHasher, PasswordHasher>()
 	.AddScoped<IActivityRepository, ActivityRepository>()
-	.AddScoped<IUserRepository, UserRepository>();
+	.AddScoped<IUserRepository, UserRepository>()
+	.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 
 builder.Services.AddAuthentication(options =>
