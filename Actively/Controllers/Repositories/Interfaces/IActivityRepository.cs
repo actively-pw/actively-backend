@@ -12,6 +12,6 @@ namespace Actively.Controllers.Repositories.Interfaces
 		Task<Activity?> GetActivityById(Guid id);
 		Task<Activity> DeleteActivity(Guid id);
 		Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc);
-		public int GetActivitiesCount();
+		int GetActivitiesCount();
 	}
 }
