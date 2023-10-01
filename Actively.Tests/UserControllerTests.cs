@@ -5,7 +5,10 @@ using Actively.Models.DTOs;
 using Actively.Services.AuthService.Interfaces;
 using Actively.Services.PasswordHasher.Interfaces;
 using FakeItEasy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Actively.Tests
 {
@@ -17,6 +20,7 @@ namespace Actively.Tests
 			//arrange
 			var tokenService = A.Fake<ITokenService>();
 			var userRepository = A.Fake<IUserRepository>();
+			var refreshTokenRepository = A.Fake<IRefreshTokenRepository>();
 			var passwordHasher = A.Fake<IPasswordHasher>();
 
 			var fakeUser = A.Dummy<User>();
@@ -25,7 +29,7 @@ namespace Actively.Tests
 
 			A.CallTo(() => userRepository.GetUserByEmailAsync(fakeEmail)).Returns(Task.FromResult(fakeUser));
 
-			var controller = new UserController(tokenService, userRepository, passwordHasher);
+			var controller = new UserController(tokenService, userRepository, refreshTokenRepository, passwordHasher);
 
 			//act
 			var actionResult = await controller.RegisterUser(fakeRegisterUserDto);
@@ -40,17 +44,27 @@ namespace Actively.Tests
 			//arrange
 			var tokenService = A.Fake<ITokenService>();
 			var userRepository = A.Fake<IUserRepository>();
+			var refreshTokenRepository = A.Fake<IRefreshTokenRepository>();
 			var passwordHasher = A.Fake<IPasswordHasher>();
 
 			var fakeRegisterUserDto = A.Dummy<RegisterUserDto>();
 			User? returnValue = null;
 			var fakeUser = A.Dummy<User>();
 			var fakeHashedPassword = A.Dummy<string>();
+			var fakeIpAddressString = A.Dummy<string>();
+			var fakeTokens = A.Dummy<TokensDto>();
+			var fakeIpAddress = A.Dummy<IPAddress>();
 
 			A.CallTo(() => userRepository.GetUserByEmailAsync(fakeRegisterUserDto.Email)).Returns(Task.FromResult(returnValue));
 			A.CallTo(() => userRepository.RegisterUserAsync(fakeRegisterUserDto, fakeHashedPassword)).Returns(Task.FromResult(fakeUser));
+			A.CallTo(() => tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(fakeTokens);
 
-			var controller = new UserController(tokenService, userRepository, passwordHasher);
+			var controller = new UserController(tokenService, userRepository, refreshTokenRepository, passwordHasher);
+
+			controller.ControllerContext = A.Dummy<ControllerContext>();
+			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+
+			A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(fakeIpAddress);
 
 			//act
 			var actionResult = await controller.RegisterUser(fakeRegisterUserDto);
@@ -65,6 +79,7 @@ namespace Actively.Tests
 			//arrange
 			var tokenService = A.Fake<ITokenService>();
 			var userRepository = A.Fake<IUserRepository>();
+			var refreshTokenRepository = A.Fake<IRefreshTokenRepository>();
 			var passwordHasher = A.Fake<IPasswordHasher>();
 
 			User? returnValue = null;
@@ -72,7 +87,7 @@ namespace Actively.Tests
 
 			A.CallTo(() => userRepository.GetUserByEmailAsync(fakeLoginUserDto.Email)).Returns(Task.FromResult(returnValue));
 
-			var controller = new UserController(tokenService, userRepository, passwordHasher);
+			var controller = new UserController(tokenService, userRepository, refreshTokenRepository, passwordHasher);
 
 			//act
 			var actionResult = await controller.LoginUser(fakeLoginUserDto);
@@ -87,6 +102,7 @@ namespace Actively.Tests
 			//arrange
 			var tokenService = A.Fake<ITokenService>();
 			var userRepository = A.Fake<IUserRepository>();
+			var refreshTokenRepository = A.Fake<IRefreshTokenRepository>();
 			var passwordHasher = A.Fake<IPasswordHasher>();
 
 			var fakeLoginUserDto = A.Dummy<LoginUserDto>();
@@ -94,7 +110,7 @@ namespace Actively.Tests
 
 			A.CallTo(() => passwordHasher.Verify(fakeLoginUserDto.Password, fakeHashedPassword)).Returns(false);
 
-			var controller = new UserController(tokenService, userRepository, passwordHasher);
+			var controller = new UserController(tokenService, userRepository, refreshTokenRepository, passwordHasher);
 
 			//act
 			var actionResult = await controller.LoginUser(fakeLoginUserDto);
@@ -109,16 +125,26 @@ namespace Actively.Tests
 			//arrange
 			var tokenService = A.Fake<ITokenService>();
 			var userRepository = A.Fake<IUserRepository>();
+			var refreshTokenRepository = A.Fake<IRefreshTokenRepository>();
 			var passwordHasher = A.Fake<IPasswordHasher>();
 
 			var fakeLoginUserDto = A.Dummy<LoginUserDto>();
 			var fakeHashedPassword = A.Dummy<string>();
 			var fakeUser = A.Dummy<User>();
+			var fakeTokens = A.Dummy<TokensDto>();
+			var fakeIpAddressString = A.Dummy<string>();
+			var fakeIpAddress = A.Dummy<IPAddress>();
 
 			A.CallTo(() => userRepository.GetUserByEmailAsync(fakeLoginUserDto.Email)).Returns(Task.FromResult(fakeUser));
 			A.CallTo(() => passwordHasher.Verify(fakeHashedPassword, fakeLoginUserDto.Password)).Returns(true);
+			A.CallTo(() => tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(fakeTokens);
 
-			var controller = new UserController(tokenService, userRepository, passwordHasher);
+			var controller = new UserController(tokenService, userRepository, refreshTokenRepository, passwordHasher);
+
+			controller.ControllerContext = A.Dummy<ControllerContext>();
+			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+
+			A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(fakeIpAddress);
 
 			//act
 			var actionResult = await controller.LoginUser(fakeLoginUserDto);
