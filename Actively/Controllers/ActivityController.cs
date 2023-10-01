@@ -5,8 +5,7 @@ using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Actively.Controllers
 {
@@ -31,8 +30,20 @@ namespace Actively.Controllers
 			{
 				var activities = await _activityRepository.GetAllActivities();
 				var enumerable = activities.ToList();
+
 				if (!enumerable.Any()) return NotFound();
-				var activitiesList = enumerable.Select(a => new GetActivityDto(a));
+
+				var activitiesList = enumerable
+					.Select(a => new GetActivityDto(a))
+					.Skip((@params.Page - 1) * @params.ItemsPerPage)
+					.Take(@params.ItemsPerPage);
+
+				int totalPagesCount = (int)Math.Ceiling((double)_activityRepository.GetActivitiesCount() / @params.ItemsPerPage);
+
+				int nextPage = @params.Page < totalPagesCount ? @params.Page + 1 : -1;
+
+				Response.Headers.Add("nextPage", nextPage.ToString());
+
 				return Ok(activitiesList);
 			}
 			catch (Exception ex)
