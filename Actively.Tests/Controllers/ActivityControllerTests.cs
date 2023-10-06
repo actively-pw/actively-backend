@@ -23,18 +23,31 @@ namespace Actively.Tests.Controllers
             _geoJsonGenerator = A.Fake<IGeoJsonGenerator>();
         }
 		[Fact]
-        public async Task GetAllActivities_ReturnsGetActivityDtoList()
+        public async Task GetAllActivities_ThereIsAtLeastOneActivity_ReturnsGetActivityDtoList()
         {
 			//arrange
 			PaginationParams @params = A.Dummy<PaginationParams>();
+			List<Activity> activitiesList = new List<Activity>{ new Activity()};
+			HttpResponse response = A.Fake<HttpResponse>();
+			HeaderDictionary header = A.Fake<HeaderDictionary>();
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
 
-            //act
-            var result = await controller.GetAllActivities(@params);
+			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
 
-            //assert
-            Assert.NotNull(result);
+			controller.ControllerContext = A.Dummy<ControllerContext>();
+			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+
+			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+
+			//act
+			var result = await controller.GetAllActivities(@params);
+
+			//assert
+			var objectResult = (ObjectResult)result.Result;
+			var enumerable = objectResult.Value as IEnumerable<GetActivityDto>;
+
+			Assert.NotNull(objectResult);
             Assert.IsType<ActionResult<List<GetActivityDto>>>(result);
         }
 
