@@ -85,7 +85,6 @@ namespace Actively.Controllers
 		{
 			try
 			{
-
 				await _blobStorage.Delete(id); // delete route file from blob storage
 
 				var result = await _activityRepository.DeleteActivity(id); // delete activity from db

@@ -6,6 +6,7 @@ using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using FakeItEasy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Tests.Controllers
@@ -204,5 +205,44 @@ namespace Actively.Tests.Controllers
 			//assert
 			Assert.IsType<OkObjectResult>(result.Result);
 		}
-    }
+
+		[Fact]
+		public async Task DeleteActivity_ValidId_ReturnsActionResultAndActivity()
+		{
+			//arrange
+			var id = A.Dummy<Guid>();
+			Activity activity = new Activity();
+			activity.Id = id;
+
+			A.CallTo(() => _activityRepository.DeleteActivity(id)).Returns(activity);
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			//act
+			var result = await controller.DeleteActivity(id);
+
+			//assert
+			Assert.IsType<ActionResult<Activity>>(result);
+		}
+
+		[Fact]
+		public async Task EditActivity_ValidId_ReturnsOkObjectResult()
+		{
+			//arrange
+			var id = A.Dummy<Guid>();
+			Activity activity = new Activity();
+			activity.Id = id;
+			JsonPatchDocument<Activity> patchDoc = A.Dummy<JsonPatchDocument<Activity>>();
+
+			A.CallTo(() => _activityRepository.EditActivity(id, patchDoc)).Returns(activity);
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			//act
+			var result = await controller.EditActivity(id, patchDoc);
+
+			//assert
+			Assert.IsType<OkObjectResult>(result.Result);
+		}
+	}
 }
