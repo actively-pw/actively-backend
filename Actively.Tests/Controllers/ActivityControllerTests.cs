@@ -101,5 +101,108 @@ namespace Actively.Tests.Controllers
 				Assert.Equal(enumerable.Count(), itemsCount - (page-1)*itemsPerPage > 0 ? itemsCount - (page - 1) * itemsPerPage : 0);
 			}
 		}
+
+		[Fact]
+		public async Task GetAllActivities_NoActivitiesInDb_ReturnsNotFound()
+		{
+			//arrange
+			PaginationParams @params = A.Dummy<PaginationParams>();
+
+			List<Activity> emptyList = new List<Activity>();
+
+			HttpResponse response = A.Fake<HttpResponse>();
+			HeaderDictionary header = A.Fake<HeaderDictionary>();
+
+			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(emptyList));
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			controller.ControllerContext = A.Dummy<ControllerContext>();
+			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+
+			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+
+			//act
+			var result = await controller.GetAllActivities(@params);
+
+			//assert
+			Assert.IsType<NotFoundResult>(result.Result);
+		}
+
+		[Theory]
+		[InlineData(1,3,5,2)]
+		[InlineData(2,3,5,-1)]
+		public async Task GetAllActivities_CanCalculateNextPage(int page, int itemsPerPage, int itemsCount, int correctNextPage)
+		{
+			//arrange
+			PaginationParams @params = new PaginationParams()
+			{
+				Page = page,
+				ItemsPerPage = itemsPerPage
+			};
+
+			List<Activity> activitiesList = new List<Activity>();
+			for (int i = 0; i < itemsCount; i++)
+			{
+				activitiesList.Add(new Activity());
+			}
+
+			HttpResponse response = A.Fake<HttpResponse>();
+			HeaderDictionary header = A.Fake<HeaderDictionary>();
+
+			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
+			A.CallTo(() => _activityRepository.GetActivitiesCount()).Returns(itemsCount);
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			controller.ControllerContext = A.Dummy<ControllerContext>();
+			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+
+			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+
+			//act
+			var result = await controller.GetAllActivities(@params);
+
+			//assert
+			Assert.True(controller.Response.Headers.ContainsKey("nextPage"));
+			int.TryParse(controller.Response.Headers["nextPage"], out int calculatedNextPage);
+			Assert.Equal(correctNextPage, calculatedNextPage);
+		}
+
+		[Fact]
+		public async Task AddActivity_ActivityWithGivenIdAlreadyExists_ReturnsBadRequest()
+		{
+			//arrange
+			var addActivityDto = A.Dummy<AddActivityDto>();
+			var activity = A.Dummy<Activity>();
+
+			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(activity);
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			//act
+			var result = await controller.AddActivity(addActivityDto);
+
+			//assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+		}
+
+		[Fact]
+		public async Task AddActivity_ValidAddActivityDto_ReturnsOkObjectResult()
+		{
+			//arrange
+			var addActivityDto = A.Dummy<AddActivityDto>();
+			Activity? returnValue = null;
+
+			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(returnValue);
+
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
+
+			//act
+			var result = await controller.AddActivity(addActivityDto);
+
+			//assert
+			Assert.IsType<OkObjectResult>(result.Result);
+		}
     }
 }
