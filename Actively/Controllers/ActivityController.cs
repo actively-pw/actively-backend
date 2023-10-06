@@ -1,9 +1,7 @@
-﻿using Actively.BlobStorage;
-using Actively.BlobStorage.Interfaces;
+﻿using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
-using Actively.Services.GeoJsonGenerator;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
