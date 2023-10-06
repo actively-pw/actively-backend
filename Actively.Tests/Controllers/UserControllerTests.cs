@@ -31,11 +31,11 @@ namespace Actively.Tests.Controllers
         public async Task RegisterUser_AlreadyUsedEmail_ReturnsBadRequestObjectResult()
         {
             //arrange
-            var fakeUser = A.Dummy<User>();
-            var fakeRegisterUserDto = A.Dummy<RegisterUserDto>();
-            var fakeEmail = A.Dummy<string>();
+            var user = A.Dummy<User>();
+            var registerUserDto = A.Dummy<RegisterUserDto>();
+            var email = A.Dummy<string>();
 
-            A.CallTo(() => _userRepository.GetUserByEmailAsync(fakeEmail)).Returns(Task.FromResult(fakeUser));
+            A.CallTo(() => _userRepository.GetUserByEmailAsync(email)).Returns(Task.FromResult(user));
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
@@ -43,7 +43,7 @@ namespace Actively.Tests.Controllers
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
             //act
-            var actionResult = await controller.RegisterUser(fakeRegisterUserDto);
+            var actionResult = await controller.RegisterUser(registerUserDto);
 
             //assert
             Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -53,27 +53,27 @@ namespace Actively.Tests.Controllers
         public async Task RegisterUser_UnusedEmail_ReturnsOkObjectResult()
         {
             //arrange
-            var fakeRegisterUserDto = A.Dummy<RegisterUserDto>();
+            var registerUserDto = A.Dummy<RegisterUserDto>();
             User? returnValue = null;
-            var fakeUser = A.Dummy<User>();
-            var fakeHashedPassword = A.Dummy<string>();
-            var fakeIpAddressString = A.Dummy<string>();
-            var fakeTokens = A.Dummy<TokensDto>();
-            var fakeIpAddress = A.Dummy<IPAddress>();
+            var user = A.Dummy<User>();
+            var hashedPassword = A.Dummy<string>();
+            var ipAddressString = A.Dummy<string>();
+            var tokens = A.Dummy<TokensDto>();
+            var ipAddress = A.Dummy<IPAddress>();
 
-            A.CallTo(() => _userRepository.GetUserByEmailAsync(fakeRegisterUserDto.Email)).Returns(Task.FromResult(returnValue));
-            A.CallTo(() => _userRepository.RegisterUserAsync(fakeRegisterUserDto, fakeHashedPassword)).Returns(Task.FromResult(fakeUser));
-            A.CallTo(() => _tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(fakeTokens);
+            A.CallTo(() => _userRepository.GetUserByEmailAsync(registerUserDto.Email)).Returns(Task.FromResult(returnValue));
+            A.CallTo(() => _userRepository.RegisterUserAsync(registerUserDto, hashedPassword)).Returns(Task.FromResult(user));
+            A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
-            A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(fakeIpAddress);
+            A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(ipAddress);
 
             //act
-            var actionResult = await controller.RegisterUser(fakeRegisterUserDto);
+            var actionResult = await controller.RegisterUser(registerUserDto);
 
             //assert
             Assert.IsType<OkObjectResult>(actionResult);
@@ -83,12 +83,12 @@ namespace Actively.Tests.Controllers
         public async Task RegisterUser_NullTokens_ReturnsBadRequestObjectResult()
         {
             //arrange
-            var fakeUser = A.Dummy<User>();
-            var fakeRegisterUserDto = A.Dummy<RegisterUserDto>();
-            var fakeIpAddressString = A.Dummy<string>();
+            var user = A.Dummy<User>();
+            var registerUserDto = A.Dummy<RegisterUserDto>();
+            var ipAddressString = A.Dummy<string>();
             TokensDto returnValue = null;
 
-            A.CallTo(() => _tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(returnValue);
+            A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
@@ -96,7 +96,7 @@ namespace Actively.Tests.Controllers
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
             //act
-            var actionResult = await controller.RegisterUser(fakeRegisterUserDto);
+            var actionResult = await controller.RegisterUser(registerUserDto);
 
             //assert
             Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -107,9 +107,9 @@ namespace Actively.Tests.Controllers
         {
             //arrange
             User? returnValue = null;
-            var fakeLoginUserDto = A.Dummy<LoginUserDto>();
+            var loginUserDto = A.Dummy<LoginUserDto>();
 
-            A.CallTo(() => _userRepository.GetUserByEmailAsync(fakeLoginUserDto.Email)).Returns(Task.FromResult(returnValue));
+            A.CallTo(() => _userRepository.GetUserByEmailAsync(loginUserDto.Email)).Returns(Task.FromResult(returnValue));
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
@@ -117,7 +117,7 @@ namespace Actively.Tests.Controllers
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
             //act
-            var actionResult = await controller.LoginUser(fakeLoginUserDto);
+            var actionResult = await controller.LoginUser(loginUserDto);
 
             //assert
             Assert.IsType<NotFoundObjectResult>(actionResult);
@@ -127,10 +127,10 @@ namespace Actively.Tests.Controllers
         public async Task LoginUser_WrongPassword_ReturnsUnauthorizedObjectResult()
         {
             //arrange
-            var fakeLoginUserDto = A.Dummy<LoginUserDto>();
-            var fakeHashedPassword = A.Dummy<string>();
+            var loginUserDto = A.Dummy<LoginUserDto>();
+            var hashedPassword = A.Dummy<string>();
 
-            A.CallTo(() => _passwordHasher.Verify(fakeLoginUserDto.Password, fakeHashedPassword)).Returns(false);
+            A.CallTo(() => _passwordHasher.Verify(loginUserDto.Password, hashedPassword)).Returns(false);
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
@@ -138,7 +138,7 @@ namespace Actively.Tests.Controllers
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
             //act
-            var actionResult = await controller.LoginUser(fakeLoginUserDto);
+            var actionResult = await controller.LoginUser(loginUserDto);
 
             //assert
             Assert.IsType<UnauthorizedObjectResult>(actionResult);
@@ -148,26 +148,26 @@ namespace Actively.Tests.Controllers
         public async Task LoginUser_CorrectEmailAndPassword_ReturnsOkObjectResult()
         {
             //arrange
-            var fakeLoginUserDto = A.Dummy<LoginUserDto>();
-            var fakeHashedPassword = A.Dummy<string>();
-            var fakeUser = A.Dummy<User>();
-            var fakeTokens = A.Dummy<TokensDto>();
-            var fakeIpAddressString = A.Dummy<string>();
-            var fakeIpAddress = A.Dummy<IPAddress>();
+            var loginUserDto = A.Dummy<LoginUserDto>();
+            var hashedPassword = A.Dummy<string>();
+            var user = A.Dummy<User>();
+            var tokens = A.Dummy<TokensDto>();
+            var ipAddressString = A.Dummy<string>();
+            var ipAddress = A.Dummy<IPAddress>();
 
-            A.CallTo(() => _userRepository.GetUserByEmailAsync(fakeLoginUserDto.Email)).Returns(Task.FromResult(fakeUser));
-            A.CallTo(() => _passwordHasher.Verify(fakeHashedPassword, fakeLoginUserDto.Password)).Returns(true);
-            A.CallTo(() => _tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(fakeTokens);
+            A.CallTo(() => _userRepository.GetUserByEmailAsync(loginUserDto.Email)).Returns(Task.FromResult(user));
+            A.CallTo(() => _passwordHasher.Verify(hashedPassword, loginUserDto.Password)).Returns(true);
+            A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
-            A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(fakeIpAddress);
+            A.CallTo(() => controller.ControllerContext.HttpContext.Connection.RemoteIpAddress).Returns(ipAddress);
 
             //act
-            var actionResult = await controller.LoginUser(fakeLoginUserDto);
+            var actionResult = await controller.LoginUser(loginUserDto);
 
             //assert
             Assert.IsType<OkObjectResult>(actionResult);
@@ -177,13 +177,13 @@ namespace Actively.Tests.Controllers
         public async Task LoginUser_NullTokens_ReturnsUnauthorizedObjectResult()
         {
             //arrange
-            var fakeLoginUserDto = A.Dummy<LoginUserDto>();
-            var fakeHashedPassword = A.Dummy<string>();
-            var fakeUser = A.Dummy<User>();
-            var fakeIpAddressString = A.Dummy<string>();
+            var loginUserDto = A.Dummy<LoginUserDto>();
+            var hashedPassword = A.Dummy<string>();
+            var user = A.Dummy<User>();
+            var ipAddressString = A.Dummy<string>();
             TokensDto returnValue = null;
 
-            A.CallTo(() => _tokenService.GetTokens(fakeUser, fakeIpAddressString)).Returns(returnValue);
+            A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
             var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
 
@@ -191,7 +191,7 @@ namespace Actively.Tests.Controllers
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
 
             //act
-            var actionResult = await controller.LoginUser(fakeLoginUserDto);
+            var actionResult = await controller.LoginUser(loginUserDto);
 
             //assert
             Assert.IsType<UnauthorizedObjectResult>(actionResult);
