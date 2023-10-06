@@ -13,7 +13,7 @@ namespace Actively.Models
 		public int TotalTime { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
-		private Activity()
+		public Activity()
         {
             Id = Guid.NewGuid();
         }

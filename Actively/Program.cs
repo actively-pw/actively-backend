@@ -1,4 +1,5 @@
 using Actively.BlobStorage;
+using Actively.BlobStorage.Interfaces;
 using Actively.Context;
 using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
@@ -6,6 +7,7 @@ using Actively.Services.AuthService;
 using Actively.Services.AuthService.Configuration;
 using Actively.Services.AuthService.Interfaces;
 using Actively.Services.GeoJsonGenerator;
+using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.InputFormatters;
 using Actively.Services.PasswordHasher;
 using Actively.Services.PasswordHasher.Interfaces;
@@ -35,8 +37,8 @@ builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
-		.AddScoped<StorageManager>()
-	.AddScoped<GeoJsonGenerator>()
+	.AddScoped<IStorageManager, StorageManager>()
+	.AddScoped<IGeoJsonGenerator, GeoJsonGenerator>()
 	.AddScoped<JwtConfig>()
 	.AddScoped<ITokenService, TokenService>()
 	.AddScoped<IPasswordHasher, PasswordHasher>()

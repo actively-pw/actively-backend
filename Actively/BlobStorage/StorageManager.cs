@@ -1,8 +1,9 @@
-﻿using Azure.Storage.Blobs;
+﻿using Actively.BlobStorage.Interfaces;
+using Azure.Storage.Blobs;
 
 namespace Actively.BlobStorage
 {
-	public class StorageManager
+	public class StorageManager : IStorageManager
 	{
 		private readonly string _connectionString;
 		private const string _geojsonRoutesContainerName = "geojson-routes";
