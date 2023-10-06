@@ -31,7 +31,7 @@ namespace Actively.Services.AuthService
 			var refreshToken = new UserRefreshToken
 			{
 				CreationDate = DateTime.Now,
-				ExpirationDate = DateTime.Now.AddMinutes(30),
+				ExpirationDate = DateTime.Now.AddDays(_jwtConfig.RefreshTokenLifetimeInDays),
 				IpAddress = ipAddress,
 				IsInvalidated = false,
 				RefreshToken = refreshTokenString,

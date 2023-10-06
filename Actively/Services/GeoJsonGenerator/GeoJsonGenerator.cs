@@ -1,8 +1,9 @@
 ﻿using Actively.Models.DTOs;
+using Actively.Services.GeoJsonGenerator.Interfaces;
 
 namespace Actively.Services.GeoJsonGenerator
 {
-	public class GeoJsonGenerator
+	public class GeoJsonGenerator : IGeoJsonGenerator
 	{
 		public MemoryStream Generate(AddActivityDto addActivityDto)
 		{

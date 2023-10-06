@@ -6,6 +6,6 @@
 		public string Audience { get; set; }
 		public string Key { get; set; }
 		public int LifetimeInSeconds { get; set; }
-		public int RefreshTokenLifetimeInMinutes { get; set; }
+		public int RefreshTokenLifetimeInDays { get; set; }
 	}
 }

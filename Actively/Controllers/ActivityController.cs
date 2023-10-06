@@ -1,11 +1,11 @@
-﻿using Actively.BlobStorage;
+﻿using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
-using Actively.Services.GeoJsonGenerator;
+using Actively.Services.GeoJsonGenerator.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
+
 
 namespace Actively.Controllers
 {
@@ -14,9 +14,9 @@ namespace Actively.Controllers
 	public class ActivityController : Controller
 	{
 		private readonly IActivityRepository _activityRepository;
-		private readonly StorageManager _blobStorage;
-		private readonly GeoJsonGenerator _geoJsonGenerator;
-		public ActivityController(IActivityRepository activityRepository, StorageManager blobStorage, GeoJsonGenerator geoJsonGenerator)
+		private readonly IStorageManager _blobStorage;
+		private readonly IGeoJsonGenerator _geoJsonGenerator;
+		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
@@ -30,6 +30,7 @@ namespace Actively.Controllers
 			{
 				var activities = await _activityRepository.GetAllActivities();
 				var enumerable = activities.ToList();
+				enumerable.Sort((a, b) => a.Start.CompareTo(b.Start));
 
 				if (!enumerable.Any()) return NotFound();
 
@@ -82,7 +83,6 @@ namespace Actively.Controllers
 		{
 			try
 			{
-
 				await _blobStorage.Delete(id); // delete route file from blob storage
 
 				var result = await _activityRepository.DeleteActivity(id); // delete activity from db
