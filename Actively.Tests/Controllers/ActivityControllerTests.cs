@@ -52,28 +52,31 @@ namespace Actively.Tests.Controllers
         }
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(5)]
-        [InlineData(0)]
-        public async Task GetAllActivities_ItemsPerPageLessThanActivitiesCount_ReturnsAmoutOfItemsEqualToItemsPerPage(int itemsPerPage)
+        [InlineData(1, 3, 5)]
+		[InlineData(2, 3, 5)]
+		[InlineData(2, 3, 10)]
+		[InlineData(4, 3, 10)]
+		[InlineData(5, 3, 10)]
+        public async Task GetAllActivities_NaturalNumberPaginationParams_CanPaginate(int page, int itemsPerPage, int itemsCount)
         {
 			//arrange
 			PaginationParams @params = new PaginationParams()
-            {
-                Page=1,
-                ItemsPerPage = itemsPerPage
-            };
-            List<Activity> activitiesList = new List<Activity>();
+			{
+				Page = page,
+				ItemsPerPage = itemsPerPage
+			};
 
-            for(int i=0; i<itemsPerPage+10; i++)
-            {
-                activitiesList.Add(A.Fake<Activity>());
-            }
+			List<Activity> activitiesList = new List<Activity>();
+			for (int i = 0; i < itemsCount; i++)
+			{
+				activitiesList.Add(new Activity());
+				activitiesList[i].Title = i.ToString();
+			}
 
-            A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
+			HttpResponse response = A.Fake<HttpResponse>();
+			HeaderDictionary header = A.Fake<HeaderDictionary>();
 
-            HttpResponse response = A.Fake<HttpResponse>();
-            HeaderDictionary header = A.Fake<HeaderDictionary>();
+			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator);
 
@@ -83,14 +86,20 @@ namespace Actively.Tests.Controllers
 			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
 
 			//act
-		    var result = await controller.GetAllActivities(@params);
+			var result = await controller.GetAllActivities(@params);
 
-            //assert
-            var objectResult = (ObjectResult)result.Result;
-            var enumerable = objectResult.Value as IEnumerable<GetActivityDto>;
+			//assert
+			var objectResult = (ObjectResult)result.Result;
+			var enumerable = objectResult.Value as IEnumerable<GetActivityDto>;
 
-            Assert.NotNull(enumerable);
-            Assert.True(enumerable.Count()==itemsPerPage);
+			if(page*itemsPerPage < itemsCount)
+			{
+				Assert.Equal(enumerable.Count(), itemsPerPage);
+			}
+			else
+			{
+				Assert.Equal(enumerable.Count(), itemsCount - (page-1)*itemsPerPage > 0 ? itemsCount - (page - 1) * itemsPerPage : 0);
+			}
 		}
     }
 }
