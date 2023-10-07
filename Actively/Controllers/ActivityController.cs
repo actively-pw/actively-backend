@@ -32,7 +32,7 @@ namespace Actively.Controllers
 			{
 				var activities = await _activityRepository.GetAllActivities();
 				var enumerable = activities.ToList();
-				enumerable.Sort((a, b) => a.Start.CompareTo(b.Start));
+				enumerable.Sort((a, b) => b.Start.CompareTo(a.Start));
 
 				if (!enumerable.Any()) return NotFound();
 
