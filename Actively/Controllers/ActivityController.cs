@@ -3,6 +3,7 @@ using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet]
+		[Authorize]
 		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromQuery] PaginationParams @params)
 		{
 			try
@@ -54,6 +56,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpPost]
+		[Authorize]
 		public async Task<ActionResult<Activity>> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
@@ -79,6 +82,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpDelete("{id}")]
+		[Authorize]
 		public async Task<ActionResult<Activity>> DeleteActivity(Guid id)
 		{
 			try
@@ -99,6 +103,7 @@ namespace Actively.Controllers
 			}
 		}
 		[HttpPatch("{id}")]
+		[Authorize]
 		public async Task<ActionResult<Activity>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			try
