@@ -15,6 +15,7 @@ using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,13 +26,46 @@ builder.Services.AddControllers(options =>
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 
 builder.Configuration.AddAzureKeyVault(
 	new Uri(builder.Configuration.GetSection("KeyVaultUrl").Value!),
 	new DefaultAzureCredential()
 	);
+
+builder.Services.AddSwaggerGen(c =>
+{
+	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Actively" });
+
+	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		Description = "This API uses bearer authentication. Bearer token must be passed as \"Bearer PasteJwtHere\".",
+		In = ParameterLocation.Header,
+		Type = SecuritySchemeType.ApiKey,
+		Scheme = "Bearer"
+	});
+
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+		new OpenApiSecurityScheme
+		{
+			Name="Bearer",
+			Scheme="oauth2",
+			In = ParameterLocation.Header,
+			Reference = new OpenApiReference
+			{
+				Type = ReferenceType.SecurityScheme,
+				Id = "Bearer"
+			}
+		},
+		new List<string>()
+		}
+	});
+
+}
+);
 
 builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
