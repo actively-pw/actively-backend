@@ -10,7 +10,7 @@ namespace Actively.Services.GeoJsonGenerator
 			var stream = new MemoryStream();
 			var writer = new StreamWriter(stream);
 
-			writer.Write("{\n\"type\":\"LineString\",\n\"coordinates\":[\n[\n");
+			writer.Write("{\n\"type\":\"LineString\",\n\"coordinates\":\n[\n");
 
 			foreach (var slice in addActivityDto.Route)
 			{
@@ -33,7 +33,7 @@ namespace Actively.Services.GeoJsonGenerator
 				}
 			}
 
-			writer.Write("]\n]\n}");
+			writer.Write("]\n}");
 
 			writer.Flush();
 			stream.Position = 0;
