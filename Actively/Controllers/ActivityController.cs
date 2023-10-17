@@ -3,6 +3,7 @@ using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
+using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,13 @@ namespace Actively.Controllers
 		private readonly IActivityRepository _activityRepository;
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
-		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator)
+		private readonly IStaticMapGenerator _staticMapGenerator;
+		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator, IStaticMapGenerator staticMapGenerator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
 			_geoJsonGenerator = geoJsonGenerator;
+			_staticMapGenerator = staticMapGenerator;
 		}
 
 		[HttpGet]
