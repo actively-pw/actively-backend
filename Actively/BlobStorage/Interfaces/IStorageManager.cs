@@ -2,8 +2,8 @@
 {
 	public interface IStorageManager
 	{
-		Task Upload(Guid activityId, Stream content);
-		Task Delete(Guid activityId);
+		Task Upload(Guid activityId, BlobType type, Stream content);
+		Task DeleteActivityBlobs(Guid activityId);
 
 	}
 }

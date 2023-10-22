@@ -2,6 +2,6 @@
 {
 	public interface IStaticMapGenerator
 	{
-		void Generate();
+		Task<MemoryStream> Generate(MemoryStream geojson);
 	}
 }

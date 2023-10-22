@@ -12,6 +12,7 @@ using Actively.Services.InputFormatters;
 using Actively.Services.PasswordHasher;
 using Actively.Services.PasswordHasher.Interfaces;
 using Actively.Services.StaticMapGenerator;
+using Actively.Services.StaticMapGenerator.Configuration;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -73,7 +74,9 @@ builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
+	.Configure<MapBoxConfig>(builder.Configuration.GetSection("MapBox"))
 	.AddScoped<JwtConfig>()
+	.AddScoped<MapBoxConfig>()
 	.AddScoped<IStorageManager, StorageManager>()
 	.AddScoped<IGeoJsonGenerator, GeoJsonGenerator>()
 	.AddScoped<IStaticMapGenerator, StaticMapGenerator>()

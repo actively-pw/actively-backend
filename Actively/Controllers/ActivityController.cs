@@ -1,4 +1,5 @@
-﻿using Actively.BlobStorage.Interfaces;
+﻿using Actively.BlobStorage;
+using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
@@ -73,7 +74,13 @@ namespace Actively.Controllers
 
 				using(var geojson = _geoJsonGenerator.Generate(addActivityDto))
 				{
-					await _blobStorage.Upload(addActivityDto.Id, geojson);
+					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
+
+					using(var staticMap = _staticMapGenerator.Generate(geojson))
+					{
+
+					}
+
 				}
 
 				return Ok(result);
@@ -90,7 +97,7 @@ namespace Actively.Controllers
 		{
 			try
 			{
-				await _blobStorage.Delete(id); // delete route file from blob storage
+				await _blobStorage.DeleteActivityBlobs(id); // delete all files related to this activity from blob storage
 
 				var result = await _activityRepository.DeleteActivity(id); // delete activity from db
 
