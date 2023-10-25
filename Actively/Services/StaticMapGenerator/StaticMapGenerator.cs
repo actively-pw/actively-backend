@@ -1,21 +1,40 @@
 ﻿using Actively.Services.StaticMapGenerator.Configuration;
 using Actively.Services.StaticMapGenerator.Interfaces;
+using Microsoft.Extensions.Options;
+using System.Net;
+using System.Drawing;
+using System.IO;
 
 namespace Actively.Services.StaticMapGenerator
 {
 	public class StaticMapGenerator : IStaticMapGenerator
 	{
 		private readonly MapBoxConfig _config;
-		public async Task<MemoryStream> Generate(MemoryStream geojson)
+
+		public StaticMapGenerator(IOptions<MapBoxConfig> config)
 		{
+			_config = config.Value;
+		}
+		public async Task<Stream> Generate(MemoryStream geojson)
+		{
+			using(var reader = new StreamReader(geojson))
 			using(var client = new HttpClient())
 			{
-				string url = "mapbox/streets-v12/static/geojson(%7B%22type%22%3A%22Point%22%2C%22coordinates%22%3A%5B-73.99%2C40.7%5D%7D)/-73.99,40.70,12/500x300?access_token=pk.eyJ1IjoiYWN0aXZlbHliYWNrZW5kIiwiYSI6ImNsbzBjYjdvdzBoYWQya3F1eTBkamdiODkifQ.O_3zKmq1mXYhZcuyXKeH8w";
+				//geojson.Position = 0;
+				//string g = reader.ReadToEnd();
+				//g = g.Replace("\n", "");
+				//g = "{\r\n\"type\":\"LineString\",\r\n\"coordinates\":[\r\n[52.2663835, 20.9668484],\r\n[52.2663666, 20.9667964],\r\n[52.266378, 20.9668411]\r\n]\r\n}";
+				string g = "{\r\n\"type\":\"LineString\",\r\n\"coordinates\":[\r\n[50.1352923, 18.669491],\r\n[50.1352763, 18.6695709],\r\n[50.1352843, 18.6695521],\r\n[50.135263, 18.6695593],\r\n[50.1352143, 18.6696133],\r\n[50.1351405, 18.6696428],\r\n[50.1350396, 18.6696775],\r\n[50.1347618, 18.6697669],\r\n[50.1343784, 18.6698764],\r\n[50.1339013, 18.6700654],\r\n[50.133389, 18.6702699],\r\n[50.1328778, 18.6703582],\r\n[50.1323293, 18.6706102],\r\n[50.1318663, 18.6710243],\r\n[50.1314415, 18.6715894],\r\n[50.1309677, 18.6721726],\r\n[50.1305036, 18.6727189],\r\n[50.1301178, 18.673052],\r\n[50.1298695, 18.6732164],\r\n[50.129802, 18.6732829],\r\n[50.129811, 18.6732374],\r\n[50.1297422, 18.6732347],\r\n[50.1295919, 18.6732945],\r\n[50.1296054, 18.6735747],\r\n[50.1298208, 18.6738949],\r\n[50.1300207, 18.6743867],\r\n[50.1302494, 18.6749785],\r\n[50.1304321, 18.6756093],\r\n[50.1304966, 18.6763756],\r\n[50.1305147, 18.6772525],\r\n[50.130511, 18.6781937],\r\n[50.1305258, 18.6791227],\r\n[50.1305563, 18.6800398],\r\n[50.1305728, 18.680943],\r\n[50.1305942, 18.681816],\r\n[50.1306035, 18.6825236],\r\n[50.1305236, 18.6828865],\r\n[50.1305407, 18.6832242],\r\n[50.1306299, 18.6836468],\r\n[50.1306424, 18.6842633],\r\n[50.1306382, 18.6850195],\r\n[50.1306051, 18.6858722],\r\n[50.130528, 18.6867201],\r\n[50.1304901, 18.6876576],\r\n[50.1304576, 18.6886485],\r\n[50.1304541, 18.6895863],\r\n[50.1305544, 18.6905126],\r\n[50.1307585, 18.6913789],\r\n[50.1310901, 18.6922246],\r\n[50.1314769, 18.6930221],\r\n[50.1317331, 18.6938572],\r\n[50.1318334, 18.6947797],\r\n[50.131781, 18.6957401],\r\n[50.1317063, 18.6966992],\r\n[50.1316599, 18.6976631],\r\n[50.1316079, 18.6986366],\r\n[50.1315452, 18.6995922],\r\n[50.1315054, 18.7005795],\r\n[50.131502, 18.7010489],\r\n[50.1314925, 18.7015187],\r\n[50.1314708, 18.7019678],\r\n[50.1314305, 18.702417],\r\n[50.1313986, 18.7028693],\r\n[50.1313717, 18.7033216],\r\n[50.1313438, 18.7037808],\r\n[50.1313184, 18.70424],\r\n[50.131292, 18.7046994],\r\n[50.1312642, 18.7051595],\r\n[50.131225, 18.7056172],\r\n[50.1311575, 18.7060561],\r\n[50.1310593, 18.706482],\r\n[50.1309544, 18.7069109],\r\n[50.1308542, 18.7073479],\r\n[50.130771, 18.7077912],\r\n[50.1306855, 18.7086892],\r\n[50.1306381, 18.7095932],\r\n[50.1305905, 18.7104412],\r\n[50.1305453, 18.7113143],\r\n[50.1305462, 18.7122248],\r\n[50.1306234, 18.7131245],\r\n[50.1306807, 18.7138365],\r\n[50.1306336, 18.7147981],\r\n[50.130539, 18.7157442],\r\n[50.1292024, 18.7297981],\r\n[50.1291725, 18.7306866],\r\n[50.1292181, 18.7315763],\r\n[50.1437992, 18.7441923]\r\n]\r\n}";
+				string url = $"mapbox/streets-v12/static/geojson({g})/auto/500x300?access_token={_config.StaticImagesToken}";
 				var response = await client.GetAsync(Path.Combine(_config.BaseUrl, url));
-				var stream = new MemoryStream();
-				var writer = new StreamWriter(stream);
-				writer.Write(response.Content);
-				return stream;
+
+				if(!response.IsSuccessStatusCode)
+				{
+					throw new WebException(response.StatusCode.ToString());
+				}
+
+				return response.Content.ReadAsStream();
+
 			}
 		}
 	}

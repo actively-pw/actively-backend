@@ -76,11 +76,9 @@ namespace Actively.Controllers
 				{
 					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
 
-					using(var staticMap = _staticMapGenerator.Generate(geojson))
-					{
+					using var staticMap = await _staticMapGenerator.Generate(geojson);
 
-					}
-
+					await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMap, staticMap);
 				}
 
 				return Ok(result);
