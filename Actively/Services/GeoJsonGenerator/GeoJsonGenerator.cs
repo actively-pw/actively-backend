@@ -17,9 +17,9 @@ namespace Actively.Services.GeoJsonGenerator
 				for(int i=0; i<slice.Locations.Length; i++)
 				{
 					writer.Write("[");
-					writer.Write(slice.Locations[i].Latitude);
-					writer.Write(", ");
 					writer.Write(slice.Locations[i].Longitude);
+					writer.Write(", ");
+					writer.Write(slice.Locations[i].Latitude);
 					writer.Write("]");
 
 					if (i < slice.Locations.Length - 1)
