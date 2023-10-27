@@ -80,6 +80,16 @@ builder.Services
 	.AddScoped<IUserRepository, UserRepository>()
 	.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("CorsPolicy", policy =>
+	{
+		policy.AllowAnyOrigin()
+			.AllowAnyMethod()
+			.AllowAnyHeader();
+	});
+});
+
 
 builder.Services.AddAuthentication(options =>
 {
