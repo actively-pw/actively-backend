@@ -2,8 +2,7 @@
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Net;
-using System.Drawing;
-using System.IO;
+
 
 namespace Actively.Services.StaticMapGenerator
 {
@@ -22,6 +21,12 @@ namespace Actively.Services.StaticMapGenerator
 			{
 				geojson.Position = 0;
 				string g = reader.ReadToEnd();
+
+				if(g.Length>=7000)
+				{
+					throw new ArgumentException("Provided geojson file might be too long - cannot generate static map");
+				}
+
 				string url = $"mapbox/streets-v12/static/geojson({g})/auto/500x300?access_token={_config.StaticImagesToken}";
 				var response = await client.GetAsync(Path.Combine(_config.BaseUrl, url));
 

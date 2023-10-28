@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "simplify-geojson": "^1.0.5"
+  }
+}

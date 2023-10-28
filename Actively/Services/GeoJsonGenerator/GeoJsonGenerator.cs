@@ -7,6 +7,8 @@ namespace Actively.Services.GeoJsonGenerator
 	{
 		public MemoryStream Generate(AddActivityDto addActivityDto)
 		{
+			//simplify geojson
+
 			var stream = new MemoryStream();
 			var writer = new StreamWriter(stream);
 
@@ -38,6 +40,14 @@ namespace Actively.Services.GeoJsonGenerator
 			writer.Flush();
 			stream.Position = 0;
 			return stream;
+		}
+
+		// Douglas-Peucker Line Approximation Algorithm
+		private List<(double longitude, double latitude)> Simplify(RouteSlice[] route)
+		{
+			List<(double longitude, double latitude)> simplified = new();
+
+			return simplified;
 		}
 	}
 }
