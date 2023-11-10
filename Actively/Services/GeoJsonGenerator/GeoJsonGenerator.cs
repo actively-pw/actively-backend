@@ -1,7 +1,6 @@
 ﻿using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 
-
 namespace Actively.Services.GeoJsonGenerator
 {
 	public class GeoJsonGenerator : IGeoJsonGenerator
@@ -9,13 +8,19 @@ namespace Actively.Services.GeoJsonGenerator
 		public MemoryStream Generate(AddActivityDto addActivityDto)
 		{
 			// convert addActivityDto.Route to list of points
-			int totalPointsCount = 0;
-			foreach (var slice in addActivityDto.Route) totalPointsCount += slice.Locations.Length;
+			List<(double X, double Y)> points = new();
+			foreach(var slice in addActivityDto.Route)
+			{
+				foreach(var location in slice.Locations)
+				{
+					points.Add((location.Longitude, location.Latitude));
+				}
+			}
 
 			//simplify geojson if totalPointsCount is big
-			if(totalPointsCount > 500)
+			if(points.Count > 100)
 			{
-				var list = Simplify(addActivityDto.Route);
+				points = Simplify(points);
 			}
 
 			var stream = new MemoryStream();
@@ -23,24 +28,21 @@ namespace Actively.Services.GeoJsonGenerator
 
 			writer.Write("{\n\"type\":\"LineString\",\n\"coordinates\":\n[\n");
 
-			foreach (var slice in addActivityDto.Route)
+			for(int i=0; i< points.Count; i++)
 			{
-				for(int i=0; i<slice.Locations.Length; i++)
-				{
-					writer.Write("[");
-					writer.Write(slice.Locations[i].Longitude);
-					writer.Write(", ");
-					writer.Write(slice.Locations[i].Latitude);
-					writer.Write("]");
+				writer.Write("[");
+				writer.Write(points[i].X);
+				writer.Write(", ");
+				writer.Write(points[i].Y);
+				writer.Write("]");
 
-					if (i < slice.Locations.Length - 1)
-					{
-						writer.Write(",\n");
-					}
-					else
-					{
-						writer.Write("\n");
-					}
+				if (i < points.Count - 1)
+				{
+					writer.Write(",\n");
+				}
+				else
+				{
+					writer.Write("\n");
 				}
 			}
 
@@ -52,18 +54,9 @@ namespace Actively.Services.GeoJsonGenerator
 		}
 
 		// Douglas-Peucker Line Approximation Algorithm
-		private List<(double X, double Y)>? Simplify(RouteSlice[] route)
+		private List<(double X, double Y)> Simplify(List<(double X, double Y)> points)
 		{
-			double tolerance = 0.0001;
-
-			List<(double X, double Y)> points = new();
-			foreach (var slice in route)
-			{
-				foreach(var point in slice.Locations)
-				{
-					points.Add((point.Longitude,  point.Latitude));
-				}
-			}
+			double tolerance = 0.000001; // jaka tolerancja
 
 			if (points is null || points.Count < 3) return points;
 
