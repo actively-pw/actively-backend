@@ -3,6 +3,7 @@ using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.Enums;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -29,8 +30,8 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet]
-		[Authorize]
-		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromQuery] PaginationParams @params)
+		//[Authorize]
+		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
 			{
@@ -40,8 +41,21 @@ namespace Actively.Controllers
 
 				if (!enumerable.Any()) return NotFound();
 
-				var activitiesList = enumerable
-					.Select(a => new GetActivityDto(a))
+				StaticMap type;
+					switch(staticMapType)
+					{
+						case "webLight":
+							type = StaticMap.WebLight;
+							break;
+						case "mobileLight":
+							type = StaticMap.MobileLight;
+							break;
+						default:
+							return BadRequest("Invalid value for header \"staticMapType\"");
+					}
+
+					var activitiesList = enumerable
+					.Select(a => new GetActivityDto(a, type))
 					.Skip((@params.Page - 1) * @params.ItemsPerPage)
 					.Take(@params.ItemsPerPage);
 
@@ -76,9 +90,11 @@ namespace Actively.Controllers
 				{
 					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
 
-					using var staticMap = await _staticMapGenerator.Generate(geojson);
-
-					await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMap, staticMap);
+					using (var staticMaps = await _staticMapGenerator.Generate(geojson))
+					{
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.WebLight);
+					}
 				}
 
 				return Ok(result);

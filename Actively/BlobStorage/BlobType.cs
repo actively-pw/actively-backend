@@ -3,6 +3,7 @@
 	public enum BlobType
 	{
 		Geojson = 0,
-		StaticMap = 1
+		StaticMapWebLight = 1,
+		StaticMapMobileLight = 2
 	}
 }

@@ -9,17 +9,34 @@ namespace Actively.BlobStorage
 		private readonly Dictionary<BlobType, string> _fileExtensions = new()
 		{
 			{BlobType.Geojson, ".geojson" },
-			{BlobType.StaticMap, ".png" }
+			{BlobType.StaticMapWebLight, ".png" },
+			{BlobType.StaticMapMobileLight, ".png" }
 		};
 		private readonly Dictionary<BlobType, string> _containerNames = new()
 		{
 			{BlobType.Geojson, "geojson-routes" },
-			{BlobType.StaticMap, "static-maps" }
+			{BlobType.StaticMapWebLight, "static-maps-web-light" },
+			{BlobType.StaticMapMobileLight, "static-maps-mobile-light" }
 		};
 
 		public StorageManager(IConfiguration configuration)
 		{
 			_connectionString = configuration.GetSection("AzureBlob").Value!;
+		}
+
+		public async Task Upload(Guid activityId, BlobType type, Stream content)
+		{
+			var blob = CreateBlob(activityId, type);
+			content.Position = 0;
+			await blob.UploadAsync(content);
+		}
+
+		//deletes all blobs related to activity with given activityId
+		public async Task DeleteActivityBlobs(Guid activityId)
+		{
+			await DeleteBlob(activityId, BlobType.Geojson);
+			await DeleteBlob(activityId, BlobType.StaticMapWebLight);
+			await DeleteBlob(activityId, BlobType.StaticMapMobileLight);
 		}
 
 		private BlobClient CreateBlob(Guid activityId, BlobType type)
@@ -39,20 +56,6 @@ namespace Actively.BlobStorage
 			containerClient.CreateIfNotExistsAsync();
 			return containerClient.GetBlobClient(blobName);
 
-		}
-
-		public async Task Upload(Guid activityId, BlobType type, Stream content)
-		{
-			var blob = CreateBlob(activityId, type);
-			content.Position = 0;
-			await blob.UploadAsync(content);
-		}
-
-		//deletes all blobs related to activity with given activityId
-		public async Task DeleteActivityBlobs(Guid activityId)
-		{
-			await DeleteBlob(activityId, BlobType.Geojson);
-			await DeleteBlob(activityId, BlobType.StaticMap);
 		}
 
 		private async Task DeleteBlob(Guid activityId, BlobType type)
