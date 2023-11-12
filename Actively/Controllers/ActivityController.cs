@@ -79,6 +79,11 @@ namespace Actively.Controllers
 		{
 			try
 			{
+				if (addActivityDto.Route.Length < 2)
+				{
+					return BadRequest("Route must consist of at least two points");
+				}
+
 				if (await _activityRepository.GetActivityById(addActivityDto.Id) is not null)
 				{
 					return BadRequest("Activity with this id already exists.");
@@ -93,7 +98,7 @@ namespace Actively.Controllers
 					using (var staticMaps = await _staticMapGenerator.Generate(geojson))
 					{
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
-						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.WebLight);
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.MobileLight);
 					}
 				}
 
