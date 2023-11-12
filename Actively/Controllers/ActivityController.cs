@@ -30,7 +30,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet]
-		//[Authorize]
+		[Authorize]
 		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try

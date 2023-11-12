@@ -13,14 +13,14 @@ namespace Actively.Services.GeoJsonGenerator
 			{
 				foreach(var location in slice.Locations)
 				{
-					points.Add((location.Longitude, location.Latitude));
+					points.Add((Math.Round(location.Longitude, 5), Math.Round(location.Latitude, 5)));
 				}
 			}
 
 			//simplify geojson if totalPointsCount is big
-			if(points.Count > 100)
+			if(points.Count > 100) // Todo: better values of precision
 			{
-				points = Simplify(points);
+				points = Simplify(points, 0.000001);
 			}
 
 			var stream = new MemoryStream();
@@ -54,10 +54,8 @@ namespace Actively.Services.GeoJsonGenerator
 		}
 
 		// Douglas-Peucker Line Approximation Algorithm
-		private List<(double X, double Y)> Simplify(List<(double X, double Y)> points)
+		private List<(double X, double Y)> Simplify(List<(double X, double Y)> points, double tolerance)
 		{
-			double tolerance = 0.000001; // jaka tolerancja
-
 			if (points is null || points.Count < 3) return points;
 
 			int firstPoint = 0;
