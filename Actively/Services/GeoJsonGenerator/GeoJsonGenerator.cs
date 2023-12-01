@@ -23,6 +23,8 @@ namespace Actively.Services.GeoJsonGenerator
 				points = Simplify(points, 0.000001);
 			}
 
+			//Todo: still too many points -> encode
+
 			var stream = new MemoryStream();
 			var writer = new StreamWriter(stream);
 

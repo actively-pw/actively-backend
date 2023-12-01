@@ -79,7 +79,9 @@ namespace Actively.Controllers
 		{
 			try
 			{
-				if (addActivityDto.Route.Length < 2)
+				int pointsCount = 0;
+				foreach (var slice in addActivityDto.Route) pointsCount += slice.Locations.Length;
+				if (pointsCount<2)
 				{
 					return BadRequest("Route must consist of at least two points");
 				}
