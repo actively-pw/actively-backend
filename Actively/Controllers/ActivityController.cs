@@ -93,11 +93,13 @@ namespace Actively.Controllers
 
 				var result = await _activityRepository.AddActivity(addActivityDto);
 
-				using(var geojson = _geoJsonGenerator.Generate(addActivityDto, out bool encoded))
+				(var geojson, var encodedPolyline) = _geoJsonGenerator.Generate(addActivityDto, out bool encoded);
+				using (geojson)
 				{
 					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
 
-					using (var staticMaps = await _staticMapGenerator.Generate(geojson, encoded))
+					var staticMapArgument = encoded ? encodedPolyline : geojson;
+					using (var staticMaps = await _staticMapGenerator.Generate(staticMapArgument, encoded))
 					{
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.MobileLight);

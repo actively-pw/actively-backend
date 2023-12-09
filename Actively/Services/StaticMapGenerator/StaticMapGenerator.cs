@@ -24,7 +24,12 @@ namespace Actively.Services.StaticMapGenerator
 			{
 				geojson.Position = 0;
 				string g = reader.ReadToEnd();
-				g = g.Replace("\n", "");
+
+				if(!encoded)
+				{
+					g = g.Replace("\n", "");
+					g = g.Replace(" ", "");
+				}
 
 				Stream webLight = await GetStaticMap(g, _webWidth, _webHeight, encoded);
 				Stream mobileLight = await GetStaticMap(g, _mobileWidth, _mobileHeight, encoded);

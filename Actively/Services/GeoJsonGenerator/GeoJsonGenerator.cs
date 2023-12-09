@@ -13,9 +13,10 @@ namespace Actively.Services.GeoJsonGenerator
 			_polylineEncoder = polylineEncoder;
 		}
 
-		public MemoryStream Generate(AddActivityDto addActivityDto, out bool encoded)
+		public (MemoryStream geojson, MemoryStream? encodedPolyline) Generate(AddActivityDto addActivityDto, out bool encoded)
 		{
 			encoded = false;
+			MemoryStream? encodedPolyline = null;
 
 			// convert addActivityDto.Route to list of points
 			List<(double X, double Y)> points = new();
@@ -36,13 +37,12 @@ namespace Actively.Services.GeoJsonGenerator
 			if(points.Count > 300) // Todo: better value for points.Count
 			{
 				encoded = true;
-				var encodedPolyline = _polylineEncoder.EncodePolyline(points);
-				var encodedStream = new MemoryStream();
-				var encodedWriter = new StreamWriter(encodedStream);
-				encodedWriter.Write(encodedPolyline);
+				var encodedString = _polylineEncoder.EncodePolyline(points);
+				encodedPolyline = new MemoryStream();
+				var encodedWriter = new StreamWriter(encodedPolyline);
+				encodedWriter.Write(encodedString);
 				encodedWriter.Flush();
-				encodedStream.Position = 0;
-				return encodedStream;
+				encodedPolyline.Position = 0;
 			}
 
 			var stream = new MemoryStream();
@@ -72,7 +72,7 @@ namespace Actively.Services.GeoJsonGenerator
 
 			writer.Flush();
 			stream.Position = 0;
-			return stream;
+			return (stream, encodedPolyline);
 		}
 
 		// Douglas-Peucker Line Approximation Algorithm
