@@ -3,7 +3,6 @@ using Actively.Services.StaticMapGenerator.Configuration;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Net;
-using System.Web;
 
 namespace Actively.Services.StaticMapGenerator
 {
