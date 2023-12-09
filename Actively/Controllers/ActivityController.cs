@@ -1,8 +1,11 @@
-﻿using Actively.BlobStorage.Interfaces;
+﻿using Actively.BlobStorage;
+using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.Enums;
 using Actively.Services.GeoJsonGenerator.Interfaces;
+using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -17,16 +20,18 @@ namespace Actively.Controllers
 		private readonly IActivityRepository _activityRepository;
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
-		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator)
+		private readonly IStaticMapGenerator _staticMapGenerator;
+		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator, IStaticMapGenerator staticMapGenerator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
 			_geoJsonGenerator = geoJsonGenerator;
+			_staticMapGenerator = staticMapGenerator;
 		}
 
 		[HttpGet]
 		[Authorize]
-		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromQuery] PaginationParams @params)
+		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
 			{
@@ -36,8 +41,21 @@ namespace Actively.Controllers
 
 				if (!enumerable.Any()) return NotFound();
 
-				var activitiesList = enumerable
-					.Select(a => new GetActivityDto(a))
+				StaticMap type;
+					switch(staticMapType)
+					{
+						case "webLight":
+							type = StaticMap.WebLight;
+							break;
+						case "mobileLight":
+							type = StaticMap.MobileLight;
+							break;
+						default:
+							return BadRequest("Invalid value for header \"staticMapType\"");
+					}
+
+					var activitiesList = enumerable
+					.Select(a => new GetActivityDto(a, type))
 					.Skip((@params.Page - 1) * @params.ItemsPerPage)
 					.Take(@params.ItemsPerPage);
 
@@ -61,6 +79,13 @@ namespace Actively.Controllers
 		{
 			try
 			{
+				int pointsCount = 0;
+				foreach (var slice in addActivityDto.Route) pointsCount += slice.Locations.Length;
+				if (pointsCount < 2)
+				{
+					return BadRequest("Route must consist of at least two points");
+				}
+
 				if (await _activityRepository.GetActivityById(addActivityDto.Id) is not null)
 				{
 					return BadRequest("Activity with this id already exists.");
@@ -68,9 +93,17 @@ namespace Actively.Controllers
 
 				var result = await _activityRepository.AddActivity(addActivityDto);
 
-				using(var geojson = _geoJsonGenerator.Generate(addActivityDto))
+				(var geojson, var encodedPolyline) = _geoJsonGenerator.Generate(addActivityDto, out bool encoded);
+				using (geojson)
 				{
-					await _blobStorage.Upload(addActivityDto.Id, geojson);
+					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
+
+					var staticMapArgument = encoded ? encodedPolyline : geojson;
+					using (var staticMaps = await _staticMapGenerator.Generate(staticMapArgument, encoded))
+					{
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.MobileLight);
+					}
 				}
 
 				return Ok(result);
@@ -87,7 +120,7 @@ namespace Actively.Controllers
 		{
 			try
 			{
-				await _blobStorage.Delete(id); // delete route file from blob storage
+				await _blobStorage.DeleteActivityBlobs(id); // delete all files related to this activity from blob storage
 
 				var result = await _activityRepository.DeleteActivity(id); // delete activity from db
 

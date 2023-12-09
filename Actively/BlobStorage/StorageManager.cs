@@ -6,33 +6,72 @@ namespace Actively.BlobStorage
 	public class StorageManager : IStorageManager
 	{
 		private readonly string _connectionString;
-		private const string _geojsonRoutesContainerName = "geojson-routes";
+		private readonly Dictionary<BlobType, string> _fileExtensions = new()
+		{
+			{BlobType.Geojson, ".geojson" },
+			{BlobType.StaticMapWebLight, ".png" },
+			{BlobType.StaticMapMobileLight, ".png" }
+		};
+		private readonly Dictionary<BlobType, string> _containerNames = new()
+		{
+			{BlobType.Geojson, "geojson-routes" },
+			{BlobType.StaticMapWebLight, "static-maps-web-light" },
+			{BlobType.StaticMapMobileLight, "static-maps-mobile-light" }
+		};
 
 		public StorageManager(IConfiguration configuration)
 		{
 			_connectionString = configuration.GetSection("AzureBlob").Value!;
 		}
 
-		private BlobClient CreateBlob(Guid activityId)
+		public async Task Upload(Guid activityId, BlobType type, Stream content)
 		{
-			var blobName = activityId + ".geojson";
-			var containerClient = new BlobContainerClient(_connectionString, _geojsonRoutesContainerName);
+			var blob = CreateBlob(activityId, type);
+			content.Position = 0;
+			await blob.UploadAsync(content);
+		}
+
+		//deletes all blobs related to activity with given activityId
+		public async Task DeleteActivityBlobs(Guid activityId)
+		{
+			await DeleteBlob(activityId, BlobType.Geojson);
+			await DeleteBlob(activityId, BlobType.StaticMapWebLight);
+			await DeleteBlob(activityId, BlobType.StaticMapMobileLight);
+		}
+
+		private BlobClient CreateBlob(Guid activityId, BlobType type)
+		{
+			if(!_fileExtensions.TryGetValue(type, out var fileExtension))
+			{
+				throw new ArgumentException("Provided blob type is invalid");
+			}
+
+			if(!_containerNames.TryGetValue(type, out var containerName))
+			{
+				throw new ArgumentException("Provided blob type is invalid");
+			}
+
+			var blobName = activityId + fileExtension;
+			var containerClient = new BlobContainerClient(_connectionString, containerName);
 			containerClient.CreateIfNotExistsAsync();
 			return containerClient.GetBlobClient(blobName);
 
 		}
 
-		public async Task Upload(Guid activityId, Stream content)
+		private async Task DeleteBlob(Guid activityId, BlobType type)
 		{
-			var blob = CreateBlob(activityId);
-			content.Position = 0;
-			await blob.UploadAsync(content);
-		}
+			if (!_fileExtensions.TryGetValue(type, out var fileExtension))
+			{
+				throw new ArgumentException("Provided blob type is invalid");
+			}
 
-		public async Task Delete(Guid activityId)
-		{
-			var blobName = activityId + ".geojson";
-			var containerClient = new BlobContainerClient(_connectionString, _geojsonRoutesContainerName);
+			if (!_containerNames.TryGetValue(type, out var containerName))
+			{
+				throw new ArgumentException("Provided blob type is invalid");
+			}
+
+			var blobName = activityId + fileExtension;
+			var containerClient = new BlobContainerClient(_connectionString, containerName);
 			var blob = containerClient.GetBlobClient(blobName);
 			await blob.DeleteIfExistsAsync();
 		}

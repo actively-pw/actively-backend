@@ -4,6 +4,6 @@ namespace Actively.Services.GeoJsonGenerator.Interfaces
 {
 	public interface IGeoJsonGenerator
 	{
-		MemoryStream Generate(AddActivityDto addActivityDto);
+		(MemoryStream geojson, MemoryStream encodedPolyline) Generate(AddActivityDto addActivityDto, out bool encoded);
 	}
 }

@@ -11,6 +11,11 @@ using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.InputFormatters;
 using Actively.Services.PasswordHasher;
 using Actively.Services.PasswordHasher.Interfaces;
+using Actively.Services.PolylineHelpers;
+using Actively.Services.PolylineHelpers.Interfaces;
+using Actively.Services.StaticMapGenerator;
+using Actively.Services.StaticMapGenerator.Configuration;
+using Actively.Services.StaticMapGenerator.Interfaces;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -71,9 +76,13 @@ builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
-	.AddScoped<IStorageManager, StorageManager>()
-	.AddScoped<IGeoJsonGenerator, GeoJsonGenerator>()
+	.Configure<MapBoxConfig>(builder.Configuration.GetSection("MapBox"))
 	.AddScoped<JwtConfig>()
+	.AddScoped<MapBoxConfig>()
+	.AddScoped<IStorageManager, StorageManager>()
+	.AddScoped<IPolylineEncoder, PolylineEncoder>()
+	.AddScoped<IGeoJsonGenerator, GeoJsonGenerator>()
+	.AddScoped<IStaticMapGenerator, StaticMapGenerator>()
 	.AddScoped<ITokenService, TokenService>()
 	.AddScoped<IPasswordHasher, PasswordHasher>()
 	.AddScoped<IActivityRepository, ActivityRepository>()

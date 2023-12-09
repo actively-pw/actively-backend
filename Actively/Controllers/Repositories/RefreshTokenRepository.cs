@@ -28,8 +28,8 @@ namespace Actively.Controllers.Repositories
 			var refreshToken = _context.RefreshTokens.Include(r => r.User).FirstOrDefault(r =>
 				!r.IsInvalidated &&
 				r.Token == tokensDto.Jwt &&
-				r.RefreshToken == tokensDto.RefreshToken &&
-				r.IpAddress == ipAddress);
+				r.RefreshToken == tokensDto.RefreshToken/* &&
+				r.IpAddress == ipAddress*/);
 
 			if (refreshToken is null)
 			{
