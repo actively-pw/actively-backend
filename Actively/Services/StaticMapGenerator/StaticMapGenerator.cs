@@ -3,7 +3,7 @@ using Actively.Services.StaticMapGenerator.Configuration;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Net;
-
+using System.Web;
 
 namespace Actively.Services.StaticMapGenerator
 {
@@ -19,23 +19,25 @@ namespace Actively.Services.StaticMapGenerator
 		{
 			_config = config.Value;
 		}
-		public async Task<StaticMapsDto> Generate(MemoryStream geojson)
+		public async Task<StaticMapsDto> Generate(MemoryStream geojson, bool encoded)
 		{
 			using(var reader = new StreamReader(geojson))
 			{
 				geojson.Position = 0;
 				string g = reader.ReadToEnd();
+				g = g.Replace("\n", "");
 
-				Stream webLight = await GetStaticMap(g, _webWidth, _webHeight);
-				Stream mobileLight = await GetStaticMap(g, _mobileWidth, _mobileHeight);
+				Stream webLight = await GetStaticMap(g, _webWidth, _webHeight, encoded);
+				Stream mobileLight = await GetStaticMap(g, _mobileWidth, _mobileHeight, encoded);
 
 				return new StaticMapsDto() { MobileLight = mobileLight, WebLight = webLight };
 			}
 		}
 
-		private async Task<Stream> GetStaticMap(string geojson, int width, int height)
+		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded)
 		{
-			string url = $"mapbox/streets-v12/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+			string url = encoded ? $"mapbox/streets-v12/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
+				$"mapbox/streets-v12/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
 
 			using (var client = new HttpClient())
 			{

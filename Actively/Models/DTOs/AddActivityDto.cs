@@ -1,5 +1,6 @@
 ﻿using Actively.Models.Enums;
 
+
 namespace Actively.Models.DTOs
 {
 	public class AddActivityDto
@@ -9,6 +10,12 @@ namespace Actively.Models.DTOs
 		public Sport Sport { get; set; }
 		public Stats Stats { get; set; }
 		public RouteSlice[] Route { get; set; }
+		public AddActivityDto()
+		{
+			Stats = new Stats(0, 0, 0);
+			Route = new RouteSlice[1];
+			Route[0] = new RouteSlice();
+		}
 	}
 	public class Stats
 	{
@@ -28,6 +35,10 @@ namespace Actively.Models.DTOs
 	{
 		public DateTime Start { get; set; }
 		public Location[] Locations { get; set; }
+		public RouteSlice()
+		{
+			Locations = new Location[2];
+		}
 	}
 
 	public class Location

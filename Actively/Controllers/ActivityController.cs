@@ -30,7 +30,7 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet]
-		[Authorize]
+		//[Authorize]
 		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
@@ -74,14 +74,14 @@ namespace Actively.Controllers
 		}
 
 		[HttpPost]
-		[Authorize]
+		//[Authorize]
 		public async Task<ActionResult<Activity>> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
 			{
 				int pointsCount = 0;
 				foreach (var slice in addActivityDto.Route) pointsCount += slice.Locations.Length;
-				if (pointsCount<2)
+				if (pointsCount < 2)
 				{
 					return BadRequest("Route must consist of at least two points");
 				}
@@ -93,11 +93,11 @@ namespace Actively.Controllers
 
 				var result = await _activityRepository.AddActivity(addActivityDto);
 
-				using(var geojson = _geoJsonGenerator.Generate(addActivityDto))
+				using(var geojson = _geoJsonGenerator.Generate(addActivityDto, out bool encoded))
 				{
 					await _blobStorage.Upload(addActivityDto.Id, BlobType.Geojson, geojson);
 
-					using (var staticMaps = await _staticMapGenerator.Generate(geojson))
+					using (var staticMaps = await _staticMapGenerator.Generate(geojson, encoded))
 					{
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.MobileLight);

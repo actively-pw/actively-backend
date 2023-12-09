@@ -1,12 +1,22 @@
 ﻿using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
+using Actively.Services.PolylineHelpers.Interfaces;
 
 namespace Actively.Services.GeoJsonGenerator
 {
 	public class GeoJsonGenerator : IGeoJsonGenerator
 	{
-		public MemoryStream Generate(AddActivityDto addActivityDto)
+		private readonly IPolylineEncoder _polylineEncoder;
+
+		public GeoJsonGenerator(IPolylineEncoder polylineEncoder)
 		{
+			_polylineEncoder = polylineEncoder;
+		}
+
+		public MemoryStream Generate(AddActivityDto addActivityDto, out bool encoded)
+		{
+			encoded = false;
+
 			// convert addActivityDto.Route to list of points
 			List<(double X, double Y)> points = new();
 			foreach(var slice in addActivityDto.Route)
@@ -18,12 +28,22 @@ namespace Actively.Services.GeoJsonGenerator
 			}
 
 			//simplify geojson if totalPointsCount is big
-			if(points.Count > 100) // Todo: better values of precision
+			if(points.Count > 600) // Todo: better values of precision
 			{
 				points = Simplify(points, 0.000001);
 			}
 
-			//Todo: still too many points -> encode
+			if(points.Count > 300) // Todo: better value for points.Count
+			{
+				encoded = true;
+				var encodedPolyline = _polylineEncoder.EncodePolyline(points);
+				var encodedStream = new MemoryStream();
+				var encodedWriter = new StreamWriter(encodedStream);
+				encodedWriter.Write(encodedPolyline);
+				encodedWriter.Flush();
+				encodedStream.Position = 0;
+				return encodedStream;
+			}
 
 			var stream = new MemoryStream();
 			var writer = new StreamWriter(stream);

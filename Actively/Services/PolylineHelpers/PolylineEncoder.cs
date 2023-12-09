@@ -1,5 +1,7 @@
 ﻿using Actively.Services.PolylineHelpers.Interfaces;
+using Microsoft.AspNetCore.Components.Forms;
 using System.Text;
+using System.Web;
 
 namespace Actively.Services.PolylineHelpers
 {
@@ -26,7 +28,9 @@ namespace Actively.Services.PolylineHelpers
 				prev = current;
 			}
 
-			return builder.ToString();
+			//var s = builder.ToString();
+
+			return HttpUtility.UrlEncode(builder.ToString());
 		}
 
 		protected string EncodeInt(int value)
