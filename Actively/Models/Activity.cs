@@ -10,9 +10,12 @@ namespace Actively.Models
         public string? Title { get; set; }
         public Sport Sport { get; set; }
         public DateTime Start { get; set; }
-		public int TotalTime { get; set; } // milliseconds
+		public long TotalTime { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
+        public double MaxSpeed { get; set; }
+        public int SumOfAscent { get; set; }
+        public int SumOfDescent { get; set; }
 		public Activity()
         {
             Id = Guid.NewGuid();

@@ -19,11 +19,11 @@ namespace Actively.Models.DTOs
 	}
 	public class Stats
 	{
-		public int Duration { get; set; } // milliseconds
+		public long Duration { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
 
-		public Stats(int duration, double distance, double averageSpeed)
+		public Stats(long duration, double distance, double averageSpeed)
 		{
 			Duration = duration;
 			Distance = distance;
