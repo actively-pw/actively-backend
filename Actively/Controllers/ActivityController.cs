@@ -6,6 +6,8 @@ using Actively.Models.DTOs;
 using Actively.Models.Enums;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
+using Actively.Services.StatisticsCalculator;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +23,15 @@ namespace Actively.Controllers
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
 		private readonly IStaticMapGenerator _staticMapGenerator;
-		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator, IStaticMapGenerator staticMapGenerator)
+		private readonly IStatisticsCalculator _statisticsCalculator;
+		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator,
+			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
 			_geoJsonGenerator = geoJsonGenerator;
 			_staticMapGenerator = staticMapGenerator;
+			_statisticsCalculator = statisticsCalculator;
 		}
 
 		[HttpGet]
@@ -91,7 +96,9 @@ namespace Actively.Controllers
 					return BadRequest("Activity with this id already exists.");
 				}
 
-				var result = await _activityRepository.AddActivity(addActivityDto);
+				ActivityStatistics statistics = _statisticsCalculator.Calculate(addActivityDto);
+
+				var result = await _activityRepository.AddActivity(addActivityDto, statistics);
 
 				(var geojson, var encodedPolyline) = _geoJsonGenerator.Generate(addActivityDto, out bool encoded);
 				using (geojson)

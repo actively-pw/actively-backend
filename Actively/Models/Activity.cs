@@ -1,5 +1,6 @@
 ﻿using Actively.Models.DTOs;
 using Actively.Models.Enums;
+using Actively.Services.StatisticsCalculator;
 
 namespace Actively.Models
 {
@@ -20,15 +21,18 @@ namespace Actively.Models
         {
             Id = Guid.NewGuid();
         }
-        public Activity(AddActivityDto addActivityDto)
+        public Activity(AddActivityDto addActivityDto, ActivityStatistics statistics)
         {
             Id = addActivityDto.Id;
             Title = addActivityDto.Title;
             Sport= addActivityDto.Sport;
             Start = addActivityDto.Route[0].Start;
-            TotalTime = addActivityDto.Stats.Duration;
-            Distance = addActivityDto.Stats.Distance;
-            AverageSpeed = addActivityDto.Stats.AverageSpeed;
+            TotalTime = statistics.Duration;
+            Distance = statistics.Distance;
+            AverageSpeed = statistics.AvgSpeed;
+            MaxSpeed = statistics.MaxSpeed;
+            SumOfAscent = statistics.SumOfAscent;
+            SumOfDescent = statistics.SumOfDescent;
         }
 
     }
