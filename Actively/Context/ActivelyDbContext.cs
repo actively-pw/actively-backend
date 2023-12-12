@@ -23,7 +23,8 @@ namespace Actively.Context
 			modelBuilder.Entity<Activity>().Property(a => a.SumOfDescent).HasDefaultValue(0);
 			modelBuilder.Entity<Activity>().Property(a => a.Distance).HasDefaultValue(0);
 			modelBuilder.Entity<Activity>().Property(a => a.TotalTime).HasDefaultValue(0);
-
+			modelBuilder.Entity<Activity>().Property(a => a.StartLongitude).HasDefaultValue(0);
+			modelBuilder.Entity<Activity>().Property(a => a.StartLatitude).HasDefaultValue(0);
 		}
 	}
 }

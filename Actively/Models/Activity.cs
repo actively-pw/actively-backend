@@ -11,6 +11,8 @@ namespace Actively.Models
         public string? Title { get; set; }
         public Sport Sport { get; set; }
         public DateTime Start { get; set; }
+		public double StartLatitude { get; set; }
+		public double StartLongitude { get; set; }
 		public long TotalTime { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
@@ -27,7 +29,9 @@ namespace Actively.Models
             Title = addActivityDto.Title;
             Sport= addActivityDto.Sport;
             Start = addActivityDto.Route[0].Start;
-            TotalTime = statistics.Duration;
+            StartLatitude = addActivityDto.Route[0].Locations[0].Latitude;
+			StartLongitude = addActivityDto.Route[0].Locations[0].Longitude;
+			TotalTime = statistics.Duration;
             Distance = statistics.Distance;
             AverageSpeed = statistics.AvgSpeed;
             MaxSpeed = statistics.MaxSpeed;

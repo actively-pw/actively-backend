@@ -5,6 +5,7 @@ using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using FakeItEasy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -18,6 +19,7 @@ namespace Actively.Tests.Controllers
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
 		private readonly IStaticMapGenerator _staticMapGenerator;
+		private readonly IStatisticsCalculator _statisticsCalculator;
 
         public ActivityControllerTests()
         {
@@ -25,6 +27,7 @@ namespace Actively.Tests.Controllers
             _blobStorage = A.Fake<IStorageManager>();
             _geoJsonGenerator = A.Fake<IGeoJsonGenerator>();
 			_staticMapGenerator = A.Fake<IStaticMapGenerator>();
+			_statisticsCalculator = A.Fake<IStatisticsCalculator>();
         }
 		[Fact]
         public async Task GetAllActivities_ThereIsAtLeastOneActivity_ReturnsGetActivityDtoList()
@@ -37,7 +40,8 @@ namespace Actively.Tests.Controllers
 
 			string staticMapType = A.Dummy<string>();
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
 
@@ -86,7 +90,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			controller.ControllerContext = A.Dummy<ControllerContext>();
 			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -125,7 +130,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(emptyList));
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			controller.ControllerContext = A.Dummy<ControllerContext>();
 			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -165,7 +171,8 @@ namespace Actively.Tests.Controllers
 			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
 			A.CallTo(() => _activityRepository.GetActivitiesCount()).Returns(itemsCount);
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			controller.ControllerContext = A.Dummy<ControllerContext>();
 			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -190,7 +197,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(activity);
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			//act
 			var result = await controller.AddActivity(addActivityDto);
@@ -209,7 +217,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(returnValue);
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			//act
 			var result = await controller.AddActivity(addActivityDto);
@@ -228,7 +237,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.DeleteActivity(id)).Returns(activity);
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			//act
 			var result = await controller.DeleteActivity(id);
@@ -248,7 +258,8 @@ namespace Actively.Tests.Controllers
 
 			A.CallTo(() => _activityRepository.EditActivity(id, patchDoc)).Returns(activity);
 
-			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator, _staticMapGenerator);
+			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
+				_staticMapGenerator, _statisticsCalculator);
 
 			//act
 			var result = await controller.EditActivity(id, patchDoc);
