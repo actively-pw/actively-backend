@@ -50,7 +50,7 @@ namespace Actively.Services.StatisticsCalculator
 			}
 
 			return new ActivityStatistics(
-				distance: distanceKilometers * 1000, // conversion to meters
+				distance: distanceKilometers,
 				duration: (long)durationMilliseconds,
 				avgSpeed: CalcAvgSpeed(distanceKilometers * 1000, durationMilliseconds),
 				maxSpeed: maxSpeed,

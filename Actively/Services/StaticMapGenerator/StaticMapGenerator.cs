@@ -20,12 +20,12 @@ namespace Actively.Services.StaticMapGenerator
 		}
 		public async Task<StaticMapsDto> Generate(MemoryStream geojson, bool encoded)
 		{
-			using(var reader = new StreamReader(geojson))
+			using (var reader = new StreamReader(geojson))
 			{
 				geojson.Position = 0;
 				string g = reader.ReadToEnd();
 
-				if(!encoded)
+				if (!encoded)
 				{
 					g = g.Replace("\n", "");
 					g = g.Replace(" ", "");

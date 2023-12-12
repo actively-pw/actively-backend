@@ -1,5 +1,4 @@
 ﻿using Actively.Services.PolylineHelpers.Interfaces;
-using Microsoft.AspNetCore.Components.Forms;
 using System.Text;
 using System.Web;
 
@@ -9,9 +8,16 @@ namespace Actively.Services.PolylineHelpers
 	{
 		public string EncodePolyline(List<(double x, double y)> polyline)
 		{
+			List<(double x, double y)> polylineCopy = new();
+
+			for (int i=0; i<polyline.Count; i++)
+			{
+				polylineCopy.Add((polyline[i].y, polyline[i].x));
+			}
+
 			var builder = new StringBuilder();
 
-			List<(int x, int y)> pointsAfterStep12 = polyline
+			List<(int x, int y)> pointsAfterStep12 = polylineCopy
 				.Select(tuple => ((int)(tuple.x * 1e5), (int)(tuple.y * 1e5)))
 				.ToList();
 
@@ -27,8 +33,6 @@ namespace Actively.Services.PolylineHelpers
 				builder.Append($"{EncodeInt(xDiff)}{EncodeInt(yDiff)}");
 				prev = current;
 			}
-
-			//var s = builder.ToString();
 
 			return HttpUtility.UrlEncode(builder.ToString());
 		}

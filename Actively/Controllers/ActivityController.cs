@@ -47,22 +47,22 @@ namespace Actively.Controllers
 				if (!enumerable.Any()) return NotFound();
 
 				StaticMap type;
-					switch(staticMapType)
-					{
-						case "webLight":
-							type = StaticMap.WebLight;
-							break;
-						case "mobileLight":
-							type = StaticMap.MobileLight;
-							break;
-						default:
-							return BadRequest("Invalid value for header \"staticMapType\"");
-					}
+				switch(staticMapType)
+				{
+					case "webLight":
+						type = StaticMap.WebLight;
+						break;
+					case "mobileLight":
+						type = StaticMap.MobileLight;
+						break;
+					default:
+						return BadRequest("Invalid value for header \"staticMapType\"");
+				}
 
-					var activitiesList = enumerable
-					.Select(a => new GetActivityDto(a, type))
-					.Skip((@params.Page - 1) * @params.ItemsPerPage)
-					.Take(@params.ItemsPerPage);
+				var activitiesList = enumerable
+				.Select(a => new GetActivityDto(a, type))
+				.Skip((@params.Page - 1) * @params.ItemsPerPage)
+				.Take(@params.ItemsPerPage);
 
 				int totalPagesCount = (int)Math.Ceiling((double)_activityRepository.GetActivitiesCount() / @params.ItemsPerPage);
 
@@ -77,6 +77,39 @@ namespace Actively.Controllers
 				return BadRequest($"Failed to get Activities: {ex.Message}");
 			}
 		}
+
+		[HttpGet("{id}")]
+		[Authorize]
+		public async Task<ActionResult<GetActivityWithsStatisticsDto>> GetActivityById(Guid id, [FromHeader(Name = "staticMapType")] string staticMapType)
+		{
+			try
+			{
+				StaticMap type;
+				switch (staticMapType)
+				{
+					case "webLight":
+						type = StaticMap.WebLight;
+						break;
+					case "mobileLight":
+						type = StaticMap.MobileLight;
+						break;
+					default:
+						return BadRequest("Invalid value for header \"staticMapType\"");
+				}
+
+				var activity = await _activityRepository.GetActivityById(id);
+
+				if (activity is null) return NotFound();
+
+				return new GetActivityWithsStatisticsDto(activity, type);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to get activity with id {id}. Exception {ex.Message}");
+			}
+		}
+
+
 
 		[HttpPost]
 		[Authorize]
