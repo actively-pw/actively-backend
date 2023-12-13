@@ -8,6 +8,7 @@ namespace Actively.Models.DTOs
 		public string? Title { get; set; }
 		public Sport Sport { get; set; }
 		public string Start { get; set; }
+		public Coordinates StartCoordinates { get; set; }
 		public DetailedStats Stats { get; set; }
 		public string RouteUrl { get; set; }
 		public string StaticMapUrl { get; set; }
@@ -17,6 +18,7 @@ namespace Actively.Models.DTOs
 			Title = activity.Title;
 			Sport = activity.Sport;
 			Start = activity.Start.ToUniversalTime().ToString("o");
+			StartCoordinates = new Coordinates(activity.StartLatitude, activity.StartLongitude);
 			Stats = new DetailedStats(activity.TotalTime, activity.Distance, activity.AverageSpeed,
 				activity.MaxSpeed, activity.SumOfAscent, activity.SumOfDescent);
 			RouteUrl = "https://actively.blob.core.windows.net/geojson-routes/" + Id.ToString() + ".geojson";

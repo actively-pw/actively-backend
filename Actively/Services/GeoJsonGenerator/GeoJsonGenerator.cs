@@ -31,7 +31,7 @@ namespace Actively.Services.GeoJsonGenerator
 			//simplify geojson if totalPointsCount is big
 			if(points.Count > 600) // Todo: better values of precision
 			{
-				points = Simplify(points, 0.000001);
+				points = Simplify(points, points.Count / (double)10_000_000);
 			}
 
 			if(points.Count > 300) // Todo: better value for points.Count
