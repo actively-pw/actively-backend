@@ -139,7 +139,11 @@ namespace Actively.Controllers
 
 				ActivityStatistics statistics = _statisticsCalculator.Calculate(addActivityDto);
 
-				var result = await _activityRepository.AddActivity(addActivityDto, statistics);
+				var accessToken = await HttpContext.GetTokenAsync("access_token");
+				var jwt = _tokenService.GetJwt(accessToken);
+				var userId = jwt.Claims.First().Value;
+
+				var result = await _activityRepository.AddActivity(addActivityDto, statistics, new Guid(userId));
 
 				(var geojson, var encodedPolyline) = _geoJsonGenerator.Generate(addActivityDto, out bool encoded);
 				using (geojson)
@@ -154,7 +158,7 @@ namespace Actively.Controllers
 					}
 				}
 
-				return Ok(result);
+				return Ok(new ActivityResponseDto(result));
 			}
 			catch (Exception ex)
 			{
@@ -164,7 +168,7 @@ namespace Actively.Controllers
 
 		[HttpDelete("{id}")]
 		[Authorize]
-		public async Task<ActionResult<Activity>> DeleteActivity(Guid id)
+		public async Task<ActionResult<ActivityResponseDto>> DeleteActivity(Guid id)
 		{
 			try
 			{
@@ -172,7 +176,7 @@ namespace Actively.Controllers
 
 				var result = await _activityRepository.DeleteActivity(id); // delete activity from db
 
-				return result;
+				return new ActivityResponseDto(result);
 			}
 			catch (KeyNotFoundException ex)
 			{
@@ -185,12 +189,12 @@ namespace Actively.Controllers
 		}
 		[HttpPatch("{id}")]
 		[Authorize]
-		public async Task<ActionResult<Activity>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
+		public async Task<ActionResult<ActivityResponseDto>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			try
 			{
 				var result = await _activityRepository.EditActivity(id, patchDoc);
-				return Ok(result);
+				return Ok(new ActivityResponseDto(result));
 			}
 			catch (KeyNotFoundException ex)
 			{

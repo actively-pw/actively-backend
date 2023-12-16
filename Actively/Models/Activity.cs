@@ -23,10 +23,10 @@ namespace Actively.Models
         {
             Id = Guid.NewGuid();
         }
-        public Activity(AddActivityDto addActivityDto, ActivityStatistics statistics)
+        public Activity(AddActivityDto addActivityDto, ActivityStatistics statistics, User user)
         {
             Id = addActivityDto.Id;
-            User = addActivityDto.User;
+            User = user;
             Title = addActivityDto.Title;
             Sport= addActivityDto.Sport;
             Start = addActivityDto.Route[0].Start;

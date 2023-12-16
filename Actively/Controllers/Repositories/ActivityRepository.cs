@@ -24,9 +24,13 @@ namespace Actively.Controllers.Repositories
 			return await _context.Activities.Where(a => a.User.Id == userId).ToListAsync();
 		}
 
-		public async Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics)
+		public async Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics, Guid userId)
 		{
-			var activity = new Activity(addActivityDto, statistics);
+			var user = _context.Users.Find(userId);
+
+			if (user is null) throw new ArgumentException($"User with id {userId} does not exist");
+
+			var activity = new Activity(addActivityDto, statistics, user);
 			await _context.Activities.AddAsync(activity);
 			await _context.SaveChangesAsync();
 			return activity;
@@ -40,7 +44,9 @@ namespace Actively.Controllers.Repositories
 		public async Task<Activity> DeleteActivity(Guid id)
 		{
 			var result = _context.Activities.FirstOrDefault(a => a.Id == id);
+
 			if (result is null) throw new KeyNotFoundException("Activity with given id does not exist.");
+
 			_context.Activities.Remove(result);
 			await _context.SaveChangesAsync();
 			return result;

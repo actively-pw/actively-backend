@@ -6,7 +6,6 @@ namespace Actively.Models.DTOs
 	public class AddActivityDto
 	{
 		public Guid Id { get; set; }
-		public User User { get; set; }
 		public string? Title { get; set; }
 		public Sport Sport { get; set; }
 		public Stats Stats { get; set; }
