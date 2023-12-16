@@ -8,7 +8,7 @@ namespace Actively.Controllers.Repositories.Interfaces
 {
 	public interface IActivityRepository
 	{
-		Task<List<Activity>> GetAllActivities();
+		Task<List<Activity>> GetActivitiesByUserId(Guid userId);
 		Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics);
 		Task<Activity?> GetActivityById(Guid id);
 		Task<Activity> DeleteActivity(Guid id);

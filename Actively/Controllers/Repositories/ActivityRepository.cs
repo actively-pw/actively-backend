@@ -19,9 +19,9 @@ namespace Actively.Controllers.Repositories
 			_context = context;
 		}
 
-		public async Task<List<Activity>> GetAllActivities()
+		public async Task<List<Activity>> GetActivitiesByUserId(Guid userId)
 		{
-			return await _context.Activities.ToListAsync();
+			return await _context.Activities.Where(a => a.User.Id == userId).ToListAsync();
 		}
 
 		public async Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics)

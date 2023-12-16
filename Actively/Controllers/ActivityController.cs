@@ -4,10 +4,12 @@ using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Models.Enums;
+using Actively.Services.AuthService.Interfaces;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Actively.Services.StatisticsCalculator;
 using Actively.Services.StatisticsCalculator.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -24,23 +26,29 @@ namespace Actively.Controllers
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
 		private readonly IStaticMapGenerator _staticMapGenerator;
 		private readonly IStatisticsCalculator _statisticsCalculator;
+		private readonly ITokenService _tokenService;
 		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator,
-			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator)
+			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator, ITokenService tokenService)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
 			_geoJsonGenerator = geoJsonGenerator;
 			_staticMapGenerator = staticMapGenerator;
 			_statisticsCalculator = statisticsCalculator;
+			_tokenService = tokenService;
 		}
 
 		[HttpGet]
 		[Authorize]
-		public async Task<ActionResult<List<GetActivityDto>>> GetAllActivities([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
+		public async Task<ActionResult<List<GetActivityDto>>> GetActivitiesByUserId([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
 			{
-				var activities = await _activityRepository.GetAllActivities();
+				var accessToken = await HttpContext.GetTokenAsync("access_token");
+				var jwt = _tokenService.GetJwt(accessToken);
+				var userId = jwt.Claims.First().Value;
+
+				var activities = await _activityRepository.GetActivitiesByUserId(new Guid(userId));
 				var enumerable = activities.ToList();
 				enumerable.Sort((a, b) => b.Start.CompareTo(a.Start));
 
