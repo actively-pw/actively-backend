@@ -19,11 +19,11 @@ namespace Actively.Models.DTOs
 	}
 	public class Stats
 	{
-		public int Duration { get; set; } // milliseconds
+		public long Duration { get; set; } // milliseconds
 		public double Distance { get; set; } // km
 		public double AverageSpeed { get; set; } // km/h
 
-		public Stats(int duration, double distance, double averageSpeed)
+		public Stats(long duration, double distance, double averageSpeed)
 		{
 			Duration = duration;
 			Distance = distance;
@@ -46,5 +46,6 @@ namespace Actively.Models.DTOs
 		public DateTime TimeStamp { get; set; }
 		public double Latitude{ get; set; }
 		public double Longitude { get; set; }
+		public double Altitude { get; set; }
 	}
 }

@@ -6,6 +6,8 @@ using Actively.Models.DTOs;
 using Actively.Models.Enums;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
+using Actively.Services.StatisticsCalculator;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +23,15 @@ namespace Actively.Controllers
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
 		private readonly IStaticMapGenerator _staticMapGenerator;
-		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator, IStaticMapGenerator staticMapGenerator)
+		private readonly IStatisticsCalculator _statisticsCalculator;
+		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator,
+			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator)
 		{
 			_activityRepository = activityRepository;
 			_blobStorage = blobStorage;
 			_geoJsonGenerator = geoJsonGenerator;
 			_staticMapGenerator = staticMapGenerator;
+			_statisticsCalculator = statisticsCalculator;
 		}
 
 		[HttpGet]
@@ -42,22 +47,22 @@ namespace Actively.Controllers
 				if (!enumerable.Any()) return NotFound();
 
 				StaticMap type;
-					switch(staticMapType)
-					{
-						case "webLight":
-							type = StaticMap.WebLight;
-							break;
-						case "mobileLight":
-							type = StaticMap.MobileLight;
-							break;
-						default:
-							return BadRequest("Invalid value for header \"staticMapType\"");
-					}
+				switch(staticMapType)
+				{
+					case "webLight":
+						type = StaticMap.WebLight;
+						break;
+					case "mobileLight":
+						type = StaticMap.MobileLight;
+						break;
+					default:
+						return BadRequest("Invalid value for header \"staticMapType\"");
+				}
 
-					var activitiesList = enumerable
-					.Select(a => new GetActivityDto(a, type))
-					.Skip((@params.Page - 1) * @params.ItemsPerPage)
-					.Take(@params.ItemsPerPage);
+				var activitiesList = enumerable
+				.Select(a => new GetActivityDto(a, type))
+				.Skip((@params.Page - 1) * @params.ItemsPerPage)
+				.Take(@params.ItemsPerPage);
 
 				int totalPagesCount = (int)Math.Ceiling((double)_activityRepository.GetActivitiesCount() / @params.ItemsPerPage);
 
@@ -72,6 +77,39 @@ namespace Actively.Controllers
 				return BadRequest($"Failed to get Activities: {ex.Message}");
 			}
 		}
+
+		[HttpGet("{id}")]
+		[Authorize]
+		public async Task<ActionResult<GetActivityWithsStatisticsDto>> GetActivityById(Guid id, [FromHeader(Name = "staticMapType")] string staticMapType)
+		{
+			try
+			{
+				StaticMap type;
+				switch (staticMapType)
+				{
+					case "webLight":
+						type = StaticMap.WebLight;
+						break;
+					case "mobileLight":
+						type = StaticMap.MobileLight;
+						break;
+					default:
+						return BadRequest("Invalid value for header \"staticMapType\"");
+				}
+
+				var activity = await _activityRepository.GetActivityById(id);
+
+				if (activity is null) return NotFound();
+
+				return new GetActivityWithsStatisticsDto(activity, type);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to get activity with id {id}. Exception {ex.Message}");
+			}
+		}
+
+
 
 		[HttpPost]
 		[Authorize]
@@ -91,7 +129,9 @@ namespace Actively.Controllers
 					return BadRequest("Activity with this id already exists.");
 				}
 
-				var result = await _activityRepository.AddActivity(addActivityDto);
+				ActivityStatistics statistics = _statisticsCalculator.Calculate(addActivityDto);
+
+				var result = await _activityRepository.AddActivity(addActivityDto, statistics);
 
 				(var geojson, var encodedPolyline) = _geoJsonGenerator.Generate(addActivityDto, out bool encoded);
 				using (geojson)

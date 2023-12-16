@@ -16,6 +16,8 @@ using Actively.Services.PolylineHelpers.Interfaces;
 using Actively.Services.StaticMapGenerator;
 using Actively.Services.StaticMapGenerator.Configuration;
 using Actively.Services.StaticMapGenerator.Interfaces;
+using Actively.Services.StatisticsCalculator;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +85,7 @@ builder.Services
 	.AddScoped<IPolylineEncoder, PolylineEncoder>()
 	.AddScoped<IGeoJsonGenerator, GeoJsonGenerator>()
 	.AddScoped<IStaticMapGenerator, StaticMapGenerator>()
+	.AddScoped<IStatisticsCalculator, StatisticsCalculator>()
 	.AddScoped<ITokenService, TokenService>()
 	.AddScoped<IPasswordHasher, PasswordHasher>()
 	.AddScoped<IActivityRepository, ActivityRepository>()

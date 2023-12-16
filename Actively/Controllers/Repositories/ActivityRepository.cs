@@ -2,6 +2,7 @@
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Services.StatisticsCalculator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +24,9 @@ namespace Actively.Controllers.Repositories
 			return await _context.Activities.ToListAsync();
 		}
 
-		public async Task<Activity> AddActivity(AddActivityDto addActivityDto)
+		public async Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics)
 		{
-			var activity = new Activity(addActivityDto);
+			var activity = new Activity(addActivityDto, statistics);
 			await _context.Activities.AddAsync(activity);
 			await _context.SaveChangesAsync();
 			return activity;
