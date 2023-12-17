@@ -141,7 +141,7 @@ namespace Actively.Controllers
 
 				var accessToken = await HttpContext.GetTokenAsync("access_token");
 				var jwt = _tokenService.GetJwt(accessToken);
-				var userId = jwt.Claims.First().Value;
+				var userId = jwt.Claims.FirstOrDefault().Value;
 
 				var result = await _activityRepository.AddActivity(addActivityDto, statistics, new Guid(userId));
 
@@ -162,7 +162,7 @@ namespace Actively.Controllers
 			}
 			catch (Exception ex)
 			{
-				return BadRequest($"Failed to add new activity. Exception {ex.Message}");
+				return BadRequest($"Failed to add new activity. Exception: {ex.Message}");
 			}
 		}
 
