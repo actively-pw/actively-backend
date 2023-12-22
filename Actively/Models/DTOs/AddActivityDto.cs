@@ -7,7 +7,7 @@ namespace Actively.Models.DTOs
 	{
 		public Guid Id { get; set; }
 		public string? Title { get; set; }
-		public Sport Sport { get; set; }
+		public string Sport { get; set; }
 		public Stats Stats { get; set; }
 		public RouteSlice[] Route { get; set; }
 		public AddActivityDto()
