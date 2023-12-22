@@ -7,7 +7,7 @@ namespace Actively.Models
 	public class Activity
 	{
         public Guid Id { get; set; }
-        //public User User { get; set; }
+        public User User { get; set; }
         public string? Title { get; set; }
         public Sport Sport { get; set; }
         public DateTime Start { get; set; }
@@ -23,9 +23,10 @@ namespace Actively.Models
         {
             Id = Guid.NewGuid();
         }
-        public Activity(AddActivityDto addActivityDto, ActivityStatistics statistics)
+        public Activity(AddActivityDto addActivityDto, ActivityStatistics statistics, User user)
         {
             Id = addActivityDto.Id;
+            User = user;
             Title = addActivityDto.Title;
             Sport= addActivityDto.Sport;
             Start = addActivityDto.Route[0].Start;

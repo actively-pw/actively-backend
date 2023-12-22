@@ -3,13 +3,18 @@ using Actively.Controllers;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Services.AuthService.Interfaces;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
 using Actively.Services.StatisticsCalculator.Interfaces;
 using FakeItEasy;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Actively.Tests.Controllers
 {
@@ -20,6 +25,7 @@ namespace Actively.Tests.Controllers
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
 		private readonly IStaticMapGenerator _staticMapGenerator;
 		private readonly IStatisticsCalculator _statisticsCalculator;
+		private readonly ITokenService _tokenService;
 
         public ActivityControllerTests()
         {
@@ -28,6 +34,7 @@ namespace Actively.Tests.Controllers
             _geoJsonGenerator = A.Fake<IGeoJsonGenerator>();
 			_staticMapGenerator = A.Fake<IStaticMapGenerator>();
 			_statisticsCalculator = A.Fake<IStatisticsCalculator>();
+			_tokenService = A.Fake<ITokenService>();
         }
 		[Fact]
         public async Task GetAllActivities_ThereIsAtLeastOneActivity_ReturnsGetActivityDtoList()
@@ -35,23 +42,54 @@ namespace Actively.Tests.Controllers
 			//arrange
 			PaginationParams @params = A.Dummy<PaginationParams>();
 			List<Activity> activitiesList = new List<Activity>{ new Activity()};
-			HttpResponse response = A.Fake<HttpResponse>();
-			HeaderDictionary header = A.Fake<HeaderDictionary>();
+			User user = A.Fake<User>();
 
-			string staticMapType = A.Dummy<string>();
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			string staticMapType = "webLight";
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
-			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
+			A.CallTo(() => _activityRepository.GetActivitiesByUserId(user.Id)).Returns(Task.FromResult(activitiesList));
 
-			controller.ControllerContext = A.Dummy<ControllerContext>();
-			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
 
-			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
-			var result = await controller.GetAllActivities(staticMapType, @params);
+			var result = await controller.GetActivitiesByUserId(staticMapType, @params);
 
 			//assert
 			var objectResult = (ObjectResult)result.Result;
@@ -85,21 +123,54 @@ namespace Actively.Tests.Controllers
 
 			string staticMapType = "webLight";
 
-			HttpResponse response = A.Fake<HttpResponse>();
-			HeaderDictionary header = A.Fake<HeaderDictionary>();
+			User user = A.Fake<User>();
 
-			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
+			A.CallTo(() => _activityRepository.GetActivitiesByUserId(user.Id)).Returns(Task.FromResult(activitiesList));
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
-			controller.ControllerContext = A.Dummy<ControllerContext>();
-			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
 
-			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
-			var result = await controller.GetAllActivities(staticMapType, @params);
+			var result = await controller.GetActivitiesByUserId(staticMapType, @params);
 
 			//assert
 			var objectResult = (ObjectResult)result.Result;
@@ -123,23 +194,55 @@ namespace Actively.Tests.Controllers
 
 			List<Activity> emptyList = new List<Activity>();
 
-			string staticMapType = A.Dummy<string>();
+			string staticMapType = "webLight";
 
-			HttpResponse response = A.Fake<HttpResponse>();
-			HeaderDictionary header = A.Fake<HeaderDictionary>();
+			User user = A.Fake<User>();
 
-			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(emptyList));
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _activityRepository.GetActivitiesByUserId(user.Id)).Returns(Task.FromResult(emptyList));
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
-			controller.ControllerContext = A.Dummy<ControllerContext>();
-			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
 
-			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
-			var result = await controller.GetAllActivities(staticMapType, @params);
+			var result = await controller.GetActivitiesByUserId(staticMapType, @params);
 
 			//assert
 			Assert.IsType<NotFoundResult>(result.Result);
@@ -165,22 +268,56 @@ namespace Actively.Tests.Controllers
 				activitiesList.Add(new Activity());
 			}
 
-			HttpResponse response = A.Fake<HttpResponse>();
-			HeaderDictionary header = A.Fake<HeaderDictionary>();
+			User user = A.Fake<User>();
 
-			A.CallTo(() => _activityRepository.GetAllActivities()).Returns(Task.FromResult(activitiesList));
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			HttpResponse response = A.Fake<HttpResponse>();
+
+			A.CallTo(() => _activityRepository.GetActivitiesByUserId(user.Id)).Returns(Task.FromResult(activitiesList));
 			A.CallTo(() => _activityRepository.GetActivitiesCount()).Returns(itemsCount);
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
-			controller.ControllerContext = A.Dummy<ControllerContext>();
-			controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
 
-			A.CallTo(() => controller.ControllerContext.HttpContext.Response.Headers).Returns(header);
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
-			var result = await controller.GetAllActivities(staticMapType, @params);
+			var result = await controller.GetActivitiesByUserId(staticMapType, @params);
 
 			//assert
 			Assert.True(controller.Response.Headers.ContainsKey("nextPage"));
@@ -195,10 +332,52 @@ namespace Actively.Tests.Controllers
 			var addActivityDto = A.Dummy<AddActivityDto>();
 			var activity = A.Dummy<Activity>();
 
+			User user = A.Fake<User>();
+
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
 			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(activity);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
+
+
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
+
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
 			var result = await controller.AddActivity(addActivityDto);
@@ -212,13 +391,52 @@ namespace Actively.Tests.Controllers
 		{
 			//arrange
 			var addActivityDto = new AddActivityDto();
-
 			Activity? returnValue = null;
+			User user = A.Fake<User>();
+
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
 
 			A.CallTo(() => _activityRepository.GetActivityById(addActivityDto.Id)).Returns(returnValue);
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
+
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
+
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
 
 			//act
 			var result = await controller.AddActivity(addActivityDto);
@@ -238,13 +456,13 @@ namespace Actively.Tests.Controllers
 			A.CallTo(() => _activityRepository.DeleteActivity(id)).Returns(activity);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
 			//act
 			var result = await controller.DeleteActivity(id);
 
 			//assert
-			Assert.IsType<ActionResult<Activity>>(result);
+			Assert.IsType<ActionResult<ActivityResponseDto>>(result);
 		}
 
 		[Fact]
@@ -259,7 +477,7 @@ namespace Actively.Tests.Controllers
 			A.CallTo(() => _activityRepository.EditActivity(id, patchDoc)).Returns(activity);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
-				_staticMapGenerator, _statisticsCalculator);
+				_staticMapGenerator, _statisticsCalculator, _tokenService);
 
 			//act
 			var result = await controller.EditActivity(id, patchDoc);
