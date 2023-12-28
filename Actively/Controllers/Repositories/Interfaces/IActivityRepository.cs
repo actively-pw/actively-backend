@@ -1,5 +1,6 @@
 ﻿using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.Enums;
 using Actively.Services.StatisticsCalculator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -14,5 +15,7 @@ namespace Actively.Controllers.Repositories.Interfaces
 		Task<Activity> DeleteActivity(Guid id);
 		Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc);
 		int GetActivitiesCount();
+		Task<List<Activity>> GetActivitiesBySport(Sport sport, Guid userId);
+		Task<List<Activity>> GetLatestActivitiesByDaysCountAndSport(int daysCount, Sport sport, Guid userId);
 	}
 }

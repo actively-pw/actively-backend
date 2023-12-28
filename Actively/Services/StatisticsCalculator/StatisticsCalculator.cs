@@ -1,5 +1,8 @@
-﻿using Actively.Models.DTOs;
+﻿using Actively.Models;
+using Actively.Models.DTOs;
+using Actively.Models.DTOs.Statistics;
 using Actively.Services.StatisticsCalculator.Interfaces;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Actively.Services.StatisticsCalculator
 {
@@ -57,6 +60,82 @@ namespace Actively.Services.StatisticsCalculator
 				sumOfAscent: (int)sumOfAscent,
 				sumOfDescent: (int)sumOfDescent
 			);
+		}
+
+		public (WeeklyStatisticsDto, YearToDateStatisticsDto, AllTimeStatisticsDto) CalculateSportSummary(List<Activity> lastWeekActivities,
+			List<Activity> lastYearActivities, List<Activity> allTimeActivities)
+		{
+			var weekStatistics = new WeeklyStatisticsDto()
+			{
+				Distance = CalculateDistance(lastWeekActivities),
+				ActivitiesCount = lastWeekActivities.Count,
+				Time = CalculateTotalTime(lastWeekActivities)
+			};
+
+			var yearStatistics = new YearToDateStatisticsDto()
+			{
+				Distance = CalculateDistance(lastYearActivities),
+				ActivitiesCount = lastYearActivities.Count,
+				Time = CalculateTotalTime(lastYearActivities),
+				ElevationGain = CalculateElevationGain(lastYearActivities)
+			};
+
+			var allTimeStatistics = new AllTimeStatisticsDto()
+			{
+				Distance = CalculateDistance(allTimeActivities),
+				ActivitiesCount = allTimeActivities.Count,
+				LongestDistance = CalculateLongestDistance(allTimeActivities)
+			};
+
+			return (weekStatistics, yearStatistics, allTimeStatistics);
+		}
+
+		private long CalculateTotalTime(List<Activity> activities)
+		{
+			if (!activities.Any()) return 0;
+
+			long totalTime = 0;
+
+			foreach (var activity in activities)
+			{
+				totalTime += activity.TotalTime;
+			}
+
+			return totalTime;
+		}
+
+		private double CalculateDistance(List<Activity> activities)
+		{
+			if (!activities.Any()) return 0;
+
+			double distance = 0;
+
+			foreach(var activity in activities)
+			{
+				distance+= activity.Distance;
+			}
+
+			return distance;
+		}
+
+		private int CalculateElevationGain(List<Activity> activities)
+		{
+			if (!activities.Any()) return 0;
+
+			int elevationGain = 0;
+
+			foreach(var activity in activities)
+			{
+				elevationGain += activity.SumOfAscent;
+			}
+
+			return elevationGain;
+		}
+
+		private double CalculateLongestDistance(List<Activity> activities)
+		{
+			if (!activities.Any()) return 0;
+			return activities.Max(a => a.Distance);
 		}
 
 		private double CalcAvgSpeed(double distanceMeters, double durationMilliseconds)
