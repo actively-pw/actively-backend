@@ -4,6 +4,7 @@ using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.AuthService.Interfaces;
 using Actively.Services.PasswordHasher.Interfaces;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using FakeItEasy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,8 @@ namespace Actively.Tests.Controllers
 		private readonly IUserRepository _userRepository;
 		private readonly IRefreshTokenRepository _refreshTokenRepository;
 		private readonly IPasswordHasher _passwordHasher;
+        private readonly IActivityRepository _activityRepository;
+        private readonly IStatisticsCalculator _statisticsCalculator;
 
         public UserControllerTests()
         {
@@ -25,6 +28,8 @@ namespace Actively.Tests.Controllers
             _userRepository=A.Fake<IUserRepository>();
             _refreshTokenRepository=A.Fake<IRefreshTokenRepository>();
             _passwordHasher=A.Fake<IPasswordHasher>();
+            _activityRepository=A.Fake<IActivityRepository>();
+            _statisticsCalculator = A.Fake<IStatisticsCalculator>();
         }
 
 		[Fact]
@@ -37,7 +42,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _userRepository.GetUserByEmailAsync(email)).Returns(Task.FromResult(user));
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -65,7 +71,8 @@ namespace Actively.Tests.Controllers
             A.CallTo(() => _userRepository.RegisterUserAsync(registerUserDto, hashedPassword)).Returns(Task.FromResult(user));
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -90,7 +97,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -111,7 +119,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _userRepository.GetUserByEmailAsync(loginUserDto.Email)).Returns(Task.FromResult(returnValue));
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -132,7 +141,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _passwordHasher.Verify(loginUserDto.Password, hashedPassword)).Returns(false);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -159,7 +169,8 @@ namespace Actively.Tests.Controllers
             A.CallTo(() => _passwordHasher.Verify(hashedPassword, loginUserDto.Password)).Returns(true);
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -185,7 +196,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
