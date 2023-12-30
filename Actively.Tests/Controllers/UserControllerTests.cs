@@ -4,11 +4,15 @@ using Actively.Models;
 using Actively.Models.DTOs;
 using Actively.Services.AuthService.Interfaces;
 using Actively.Services.PasswordHasher.Interfaces;
+using Actively.Services.StatisticsCalculator.Interfaces;
 using FakeItEasy;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-
+using System.Security.Claims;
 
 namespace Actively.Tests.Controllers
 {
@@ -18,6 +22,8 @@ namespace Actively.Tests.Controllers
 		private readonly IUserRepository _userRepository;
 		private readonly IRefreshTokenRepository _refreshTokenRepository;
 		private readonly IPasswordHasher _passwordHasher;
+        private readonly IActivityRepository _activityRepository;
+        private readonly IStatisticsCalculator _statisticsCalculator;
 
         public UserControllerTests()
         {
@@ -25,6 +31,8 @@ namespace Actively.Tests.Controllers
             _userRepository=A.Fake<IUserRepository>();
             _refreshTokenRepository=A.Fake<IRefreshTokenRepository>();
             _passwordHasher=A.Fake<IPasswordHasher>();
+            _activityRepository=A.Fake<IActivityRepository>();
+            _statisticsCalculator = A.Fake<IStatisticsCalculator>();
         }
 
 		[Fact]
@@ -37,7 +45,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _userRepository.GetUserByEmailAsync(email)).Returns(Task.FromResult(user));
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -65,7 +74,8 @@ namespace Actively.Tests.Controllers
             A.CallTo(() => _userRepository.RegisterUserAsync(registerUserDto, hashedPassword)).Returns(Task.FromResult(user));
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -90,7 +100,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -111,7 +122,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _userRepository.GetUserByEmailAsync(loginUserDto.Email)).Returns(Task.FromResult(returnValue));
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -132,7 +144,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _passwordHasher.Verify(loginUserDto.Password, hashedPassword)).Returns(false);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -159,7 +172,8 @@ namespace Actively.Tests.Controllers
             A.CallTo(() => _passwordHasher.Verify(hashedPassword, loginUserDto.Password)).Returns(true);
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(tokens);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -185,7 +199,8 @@ namespace Actively.Tests.Controllers
 
             A.CallTo(() => _tokenService.GetTokens(user, ipAddressString)).Returns(returnValue);
 
-            var controller = new UserController(_tokenService, _userRepository, _refreshTokenRepository, _passwordHasher);
+            var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+                _passwordHasher, _statisticsCalculator);
 
             controller.ControllerContext = A.Dummy<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Dummy<HttpContext>();
@@ -196,5 +211,61 @@ namespace Actively.Tests.Controllers
             //assert
             Assert.IsType<UnauthorizedObjectResult>(actionResult);
         }
-    }
+
+        [Fact]
+        public async Task GetSummaryStatistics_CorrectData_ReturnsOkObjectResult()
+        {
+			//arrange
+			User user = A.Fake<User>();
+
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
+			var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+				_passwordHasher, _statisticsCalculator);
+
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
+
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
+
+			//act
+			var result = await controller.GetSummaryStatistics();
+
+			//assert
+            Assert.IsType<OkObjectResult>(result.Result);
+		}
+
+	}
 }

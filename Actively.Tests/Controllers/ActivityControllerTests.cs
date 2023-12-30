@@ -383,7 +383,7 @@ namespace Actively.Tests.Controllers
 			var result = await controller.AddActivity(addActivityDto);
 
 			//assert
-			Assert.IsType<BadRequestObjectResult>(result.Result);
+			Assert.IsType<BadRequestObjectResult>(result);
 		}
 
 		[Fact]
@@ -442,7 +442,7 @@ namespace Actively.Tests.Controllers
 			var result = await controller.AddActivity(addActivityDto);
 
 			//assert
-			Assert.IsType<OkObjectResult>(result.Result);
+			Assert.IsType<OkResult>(result);
 		}
 
 		[Fact]

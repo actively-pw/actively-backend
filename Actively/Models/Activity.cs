@@ -28,7 +28,7 @@ namespace Actively.Models
             Id = addActivityDto.Id;
             User = user;
             Title = addActivityDto.Title;
-            Sport= addActivityDto.Sport;
+            Sport= SportConverter.StringToSport(addActivityDto.Sport);
             Start = addActivityDto.Route[0].Start;
             StartLatitude = addActivityDto.Route[0].Locations[0].Latitude;
 			StartLongitude = addActivityDto.Route[0].Locations[0].Longitude;

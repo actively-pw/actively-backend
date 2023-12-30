@@ -2,6 +2,7 @@
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.Enums;
 using Actively.Services.StatisticsCalculator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -86,6 +87,21 @@ namespace Actively.Controllers.Repositories
 		public int GetActivitiesCount()
 		{
 			return _context.Activities.Count();
+		}
+
+		public async Task<List<Activity>> GetActivitiesBySport(Sport sport, Guid userId)
+		{
+			return await _context.Activities.Where(a => a.User.Id == userId && a.Sport == sport).ToListAsync();
+		}
+
+		public async Task<List<Activity>> GetLatestActivitiesByDaysCountAndSport(int daysCount, Sport sport, Guid userId)
+		{
+			return await _context.Activities
+				.Where(a =>
+					a.User.Id == userId
+					&& a.Sport == sport
+					&& a.Start >= DateTime.Today.AddDays(-daysCount))
+				.ToListAsync();
 		}
 	}
 }

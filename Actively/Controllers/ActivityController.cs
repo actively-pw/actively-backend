@@ -121,7 +121,7 @@ namespace Actively.Controllers
 
 		[HttpPost]
 		[Authorize]
-		public async Task<ActionResult<Activity>> AddActivity(AddActivityDto addActivityDto)
+		public async Task<ActionResult> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
 			{
@@ -158,7 +158,7 @@ namespace Actively.Controllers
 					}
 				}
 
-				return Ok(new ActivityResponseDto(result));
+				return Ok();
 			}
 			catch (Exception ex)
 			{
