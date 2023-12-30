@@ -150,29 +150,36 @@ namespace Actively.Controllers
 		[Authorize]
 		public async Task<ActionResult<SummaryStatisticsDto>> GetSummaryStatistics()
 		{
-			var accessToken = await HttpContext.GetTokenAsync("access_token");
-			var jwt = _tokenService.GetJwt(accessToken);
-			var userId = jwt.Claims.FirstOrDefault().Value;
-			var userIdGuid = new Guid(userId);
-
-			Dictionary<Sport, SportSummaryDto> sportSummaries = new();
-
-			foreach (Sport sport in Enum.GetValues(typeof(Sport)))
+			try
 			{
-				var lastWeekActivities = await _activityRepository.GetLatestActivitiesByDaysCountAndSport(_daysInWeek, sport, userIdGuid); // todo: not found
-				var lastYearActivities = await _activityRepository.GetLatestActivitiesByDaysCountAndSport(_daysInYear, sport, userIdGuid);
-				var allTimeActivities = await _activityRepository.GetActivitiesBySport(sport, userIdGuid);
+				var accessToken = await HttpContext.GetTokenAsync("access_token");
+				var jwt = _tokenService.GetJwt(accessToken);
+				var userId = jwt.Claims.FirstOrDefault().Value;
+				var userIdGuid = new Guid(userId);
 
-				var statistics = _statisticsCalculator.CalculateSportSummary(lastWeekActivities, lastYearActivities, allTimeActivities);
-				sportSummaries.Add(sport, new SportSummaryDto(sport, statistics));
+				Dictionary<Sport, SportSummaryDto> sportSummaries = new();
+
+				foreach (Sport sport in Enum.GetValues(typeof(Sport)))
+				{
+					var lastWeekActivities = await _activityRepository.GetLatestActivitiesByDaysCountAndSport(_daysInWeek, sport, userIdGuid); // todo: not found
+					var lastYearActivities = await _activityRepository.GetLatestActivitiesByDaysCountAndSport(_daysInYear, sport, userIdGuid);
+					var allTimeActivities = await _activityRepository.GetActivitiesBySport(sport, userIdGuid);
+
+					var statistics = _statisticsCalculator.CalculateSportSummary(lastWeekActivities, lastYearActivities, allTimeActivities);
+					sportSummaries.Add(sport, new SportSummaryDto(sport, statistics));
+				}
+
+				return Ok(new SummaryStatisticsDto
+				{
+					Cycling = sportSummaries[Sport.BicycleRide],
+					Running = sportSummaries[Sport.Run],
+					NordicWalking = sportSummaries[Sport.NordicWalking]
+				});
 			}
-
-			return Ok(new SummaryStatisticsDto
+			catch (Exception ex)
 			{
-				Cycling = sportSummaries[Sport.BicycleRide],
-				Running = sportSummaries[Sport.Run],
-				NordicWalking = sportSummaries[Sport.NordicWalking]
-			});
+				return BadRequest($"Failed to get summary statistics: {ex.Message}");
+			}
 		}
 
 	}
