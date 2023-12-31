@@ -3,6 +3,8 @@
 	public enum StaticMap : byte
 	{
 		WebLight = 0,
-		MobileLight = 1
+		MobileLight = 1,
+		WebDark = 2,
+		MobileDark = 3,
 	}
 }

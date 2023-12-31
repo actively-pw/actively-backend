@@ -31,6 +31,12 @@ namespace Actively.Models.DTOs
 				case StaticMap.MobileLight:
 					container = "static-maps-mobile-light";
 					break;
+				case StaticMap.WebDark:
+					container = "static-maps-web-dark";
+					break;
+				case StaticMap.MobileDark:
+					container = "static-maps-mobile-dark";
+					break;
 				default:
 					throw new ArgumentException("Invalid static map type");
 			}

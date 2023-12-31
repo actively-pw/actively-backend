@@ -63,6 +63,12 @@ namespace Actively.Controllers
 					case "mobileLight":
 						type = StaticMap.MobileLight;
 						break;
+					case "webDark":
+						type = StaticMap.WebDark;
+						break;
+					case "mobileDark":
+						type = StaticMap.MobileDark;
+						break;
 					default:
 						return BadRequest("Invalid value for header \"staticMapType\"");
 				}
@@ -100,6 +106,12 @@ namespace Actively.Controllers
 						break;
 					case "mobileLight":
 						type = StaticMap.MobileLight;
+						break;
+					case "webDark":
+						type = StaticMap.WebDark;
+						break;
+					case "mobileDark":
+						type = StaticMap.MobileDark;
 						break;
 					default:
 						return BadRequest("Invalid value for header \"staticMapType\"");
