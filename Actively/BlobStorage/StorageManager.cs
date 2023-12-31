@@ -10,13 +10,17 @@ namespace Actively.BlobStorage
 		{
 			{BlobType.Geojson, ".geojson" },
 			{BlobType.StaticMapWebLight, ".png" },
-			{BlobType.StaticMapMobileLight, ".png" }
+			{BlobType.StaticMapMobileLight, ".png" },
+			{BlobType.StaticMapWebDark, ".png" },
+			{BlobType.StaticMapMobileDark, ".png" }
 		};
 		private readonly Dictionary<BlobType, string> _containerNames = new()
 		{
 			{BlobType.Geojson, "geojson-routes" },
 			{BlobType.StaticMapWebLight, "static-maps-web-light" },
-			{BlobType.StaticMapMobileLight, "static-maps-mobile-light" }
+			{BlobType.StaticMapMobileLight, "static-maps-mobile-light" },
+			{BlobType.StaticMapWebDark, "static-maps-web-dark" },
+			{BlobType.StaticMapMobileDark, "static-maps-mobile-dark" }
 		};
 
 		public StorageManager(IConfiguration configuration)
@@ -34,9 +38,10 @@ namespace Actively.BlobStorage
 		//deletes all blobs related to activity with given activityId
 		public async Task DeleteActivityBlobs(Guid activityId)
 		{
-			await DeleteBlob(activityId, BlobType.Geojson);
-			await DeleteBlob(activityId, BlobType.StaticMapWebLight);
-			await DeleteBlob(activityId, BlobType.StaticMapMobileLight);
+			foreach(BlobType blobType in Enum.GetValues(typeof(BlobType)))
+			{
+				await DeleteBlob(activityId, blobType);
+			}
 		}
 
 		private BlobClient CreateBlob(Guid activityId, BlobType type)
