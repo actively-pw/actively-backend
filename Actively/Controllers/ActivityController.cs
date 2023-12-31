@@ -155,6 +155,8 @@ namespace Actively.Controllers
 					{
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebLight, staticMaps.WebLight);
 						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileLight, staticMaps.MobileLight);
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapWebDark, staticMaps.WebDark);
+						await _blobStorage.Upload(addActivityDto.Id, BlobType.StaticMapMobileDark, staticMaps.MobileDark);
 					}
 				}
 
