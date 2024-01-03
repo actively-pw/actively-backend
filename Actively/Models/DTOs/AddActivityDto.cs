@@ -1,6 +1,4 @@
-﻿using Actively.Models.Enums;
-
-
+﻿
 namespace Actively.Models.DTOs
 {
 	public class AddActivityDto

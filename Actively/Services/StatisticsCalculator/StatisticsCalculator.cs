@@ -2,11 +2,11 @@
 using Actively.Models.DTOs;
 using Actively.Models.DTOs.Statistics;
 using Actively.Services.StatisticsCalculator.Interfaces;
-using System.Reflection.Metadata.Ecma335;
+using System.Numerics;
 
 namespace Actively.Services.StatisticsCalculator
 {
-	public class StatisticsCalculator : IStatisticsCalculator
+    public class StatisticsCalculator : IStatisticsCalculator
 	{
 		public ActivityStatistics Calculate(AddActivityDto addActivityDto)
 		{
@@ -22,15 +22,37 @@ namespace Actively.Services.StatisticsCalculator
 				var locations = slice.Locations;
 				// time between start/resume of recording till first location update
 				durationMilliseconds += (locations[0].TimeStamp - slice.Start).TotalMilliseconds;
+				var vectorsToAverageOld = new Vector2(0.0f, 0.0f);
 				for (int i = 0; i < locations.Length - 1; i++)
 				{
-					var loc1 = locations[i];
-					var loc2 = locations[i + 1];
+					double distanceKm = 0;
+					double speed = 0;
+					double passedTimeH = 0;
+					if (i < locations.Length - 6)
+					{
+						var vectorsToAverage = new Vector2(0.0f, 0.0f);
+						double averageTime = 0.0;
+						for (int j = 0; j < 6; j++)
+						{
+							vectorsToAverage += LocationOperations.ProjectedDistance(locations[i], locations[i + j], DistanceUnit.Kilometers);
+							averageTime += (locations[i + j].TimeStamp - locations[i].TimeStamp).TotalHours;
+						}
+						vectorsToAverage = vectorsToAverage / 5.0f;
+						averageTime = averageTime / 5.0f;
+						distanceKm = (vectorsToAverage - vectorsToAverageOld).Length();
+						vectorsToAverageOld = vectorsToAverage;
+						var loc1 = locations[i];
+						var loc2 = locations[i + 1];
 
-					var distanceKm = LocationOperations.Distance(loc1, loc2, DistanceUnit.Kilometers);
-					var passedTimeH = (loc2.TimeStamp - loc1.TimeStamp).TotalHours;
-					var speed = passedTimeH == 0 ? 0.0 : distanceKm / passedTimeH;
-
+						passedTimeH = (loc2.TimeStamp - loc1.TimeStamp).TotalHours;
+						speed = passedTimeH == 0 ? 0.0 : distanceKm / averageTime;
+					}
+					else
+					{
+						passedTimeH = 0.0;
+						distanceKm = 0.0;
+					}
+		
 					if (speed > maxSpeed)
 					{
 						maxSpeed = speed;
@@ -39,8 +61,9 @@ namespace Actively.Services.StatisticsCalculator
 					distanceKilometers += distanceKm;
 					// conversion to ms
 					durationMilliseconds += passedTimeH * 60 * 60 * 1000;
-
-					var altitudeDifference = loc2.Altitude - loc1.Altitude;
+					var loc1alt = locations[i];
+					var loc2alt = locations[i + 1];
+					var altitudeDifference = loc1alt.Altitude - loc1alt.Altitude;
 					if (altitudeDifference > 0)
 					{
 						sumOfAscent += altitudeDifference;
@@ -168,6 +191,16 @@ namespace Actively.Services.StatisticsCalculator
 			return RadiansToMeters(2 * Math.Atan2(Math.Sqrt(value), Math.Sqrt(1 - value)), unit);
 		}
 
+		public static Vector2 ProjectedDistance(Location a, Location b, DistanceUnit unit)
+		{
+			double difLat = DegreesToRadians(b.Latitude - a.Latitude);
+			double difLon = DegreesToRadians(b.Longitude - a.Longitude);
+
+			double x = RadiansToMeters(difLat, unit);
+			double y = RadiansToMeters(difLon, unit);
+
+			return new Vector2((float)x, (float)y);
+		}
 		private static double RadiansToMeters(double radians, DistanceUnit unit) => radians * _factors[unit];
 
 		private static double DegreesToRadians(double degrees) => degrees % 360.0 * Math.PI / 180.0;

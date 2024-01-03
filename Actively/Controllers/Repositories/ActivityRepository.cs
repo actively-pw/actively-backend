@@ -2,8 +2,8 @@
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.DTOs.Statistics;
 using Actively.Models.Enums;
-using Actively.Services.StatisticsCalculator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Actively.Controllers.Repositories
 {
-	public class ActivityRepository : IActivityRepository
+    public class ActivityRepository : IActivityRepository
 	{
 		private readonly ActivelyDbContext _context;
 

@@ -4,7 +4,7 @@ using Actively.Models.DTOs.Statistics;
 
 namespace Actively.Services.StatisticsCalculator.Interfaces
 {
-	public interface IStatisticsCalculator
+    public interface IStatisticsCalculator
 	{
 		ActivityStatistics Calculate(AddActivityDto addActivityDto);
 		(WeeklyStatisticsDto, YearToDateStatisticsDto, AllTimeStatisticsDto) CalculateSportSummary(List<Activity> weekActivities,

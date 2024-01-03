@@ -58,7 +58,7 @@ namespace Actively.Tests.Controllers
 
 			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
 
-			string staticMapType = "webLight";
+			string staticMapType = "web";
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,
 				_staticMapGenerator, _statisticsCalculator, _tokenService);
@@ -121,7 +121,7 @@ namespace Actively.Tests.Controllers
 				activitiesList[i].Title = i.ToString();
 			}
 
-			string staticMapType = "webLight";
+			string staticMapType = "web";
 
 			User user = A.Fake<User>();
 
@@ -194,7 +194,7 @@ namespace Actively.Tests.Controllers
 
 			List<Activity> emptyList = new List<Activity>();
 
-			string staticMapType = "webLight";
+			string staticMapType = "web";
 
 			User user = A.Fake<User>();
 
@@ -260,7 +260,7 @@ namespace Actively.Tests.Controllers
 				ItemsPerPage = itemsPerPage
 			};
 
-			string staticMapType = "webLight";
+			string staticMapType = "web";
 
 			List<Activity> activitiesList = new List<Activity>();
 			for (int i = 0; i < itemsCount; i++)

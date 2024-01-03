@@ -11,7 +11,8 @@ namespace Actively.Models.DTOs
 		public Coordinates StartCoordinates { get; set;}
 		public Stats Stats { get; set;}
 		public string RouteUrl { get; set;}
-		public string StaticMapUrl { get; set;}
+		public string LightStaticMapUrl { get; set;}
+		public string DarkStaticMapUrl { get; set; }
 		public GetActivityDto(Activity activity, StaticMap staticMapType)
 		{
 			Id = activity.Id;
@@ -21,25 +22,22 @@ namespace Actively.Models.DTOs
 			StartCoordinates = new Coordinates(activity.StartLatitude, activity.StartLongitude);
 			Stats = new Stats(activity.TotalTime, activity.Distance, activity.AverageSpeed);
 			RouteUrl = "https://actively.blob.core.windows.net/geojson-routes/" + Id.ToString() + ".geojson";
-			string container;
+			string containerLight, containerDark;
 			switch(staticMapType)
 			{
-				case StaticMap.WebLight:
-					container = "static-maps-web-light";
+				case StaticMap.Web:
+					containerLight = "static-maps-web-light";
+					containerDark = "static-maps-web-dark";
 					break;
-				case StaticMap.MobileLight:
-					container = "static-maps-mobile-light";
-					break;
-				case StaticMap.WebDark:
-					container = "static-maps-web-dark";
-					break;
-				case StaticMap.MobileDark:
-					container = "static-maps-mobile-dark";
+				case StaticMap.Mobile:
+					containerLight = "static-maps-mobile-light";
+					containerDark = "static-maps-mobile-dark";
 					break;
 				default:
 					throw new ArgumentException("Invalid static map type");
 			}
-			StaticMapUrl = "https://actively.blob.core.windows.net/" + container + "/" + Id.ToString() + ".png";
+			LightStaticMapUrl = "https://actively.blob.core.windows.net/" + containerLight + "/" + Id.ToString() + ".png";
+			DarkStaticMapUrl = "https://actively.blob.core.windows.net/" + containerDark + "/" + Id.ToString() + ".png";
 		}
 	}
 	public class Coordinates

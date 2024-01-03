@@ -19,6 +19,11 @@ namespace Actively.Controllers.Repositories
 			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 		}
 
+		public async Task<User?> GetUserByIdAsync(Guid id)
+		{
+			return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+		}
+
 		public async Task<User> RegisterUserAsync(RegisterUserDto registerUserDto, string hashedPassword)
 		{
 			var user = new User(

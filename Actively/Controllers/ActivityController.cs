@@ -3,11 +3,11 @@ using Actively.BlobStorage.Interfaces;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.DTOs.Statistics;
 using Actively.Models.Enums;
 using Actively.Services.AuthService.Interfaces;
 using Actively.Services.GeoJsonGenerator.Interfaces;
 using Actively.Services.StaticMapGenerator.Interfaces;
-using Actively.Services.StatisticsCalculator;
 using Actively.Services.StatisticsCalculator.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers
 {
-	[Route("Activities")]
+	[Authorize]
+    [Route("Activities")]
 	[ApiController]
 	public class ActivityController : Controller
 	{
@@ -39,7 +40,6 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet]
-		[Authorize]
 		public async Task<ActionResult<List<GetActivityDto>>> GetActivitiesByUserId([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
@@ -57,17 +57,11 @@ namespace Actively.Controllers
 				StaticMap type;
 				switch(staticMapType)
 				{
-					case "webLight":
-						type = StaticMap.WebLight;
+					case "web":
+						type = StaticMap.Web;
 						break;
-					case "mobileLight":
-						type = StaticMap.MobileLight;
-						break;
-					case "webDark":
-						type = StaticMap.WebDark;
-						break;
-					case "mobileDark":
-						type = StaticMap.MobileDark;
+					case "mobile":
+						type = StaticMap.Mobile;
 						break;
 					default:
 						return BadRequest("Invalid value for header \"staticMapType\"");
@@ -93,7 +87,6 @@ namespace Actively.Controllers
 		}
 
 		[HttpGet("{id}")]
-		[Authorize]
 		public async Task<ActionResult<GetActivityWithsStatisticsDto>> GetActivityById(Guid id, [FromHeader(Name = "staticMapType")] string staticMapType)
 		{
 			try
@@ -101,17 +94,11 @@ namespace Actively.Controllers
 				StaticMap type;
 				switch (staticMapType)
 				{
-					case "webLight":
-						type = StaticMap.WebLight;
+					case "web":
+						type = StaticMap.Web;
 						break;
-					case "mobileLight":
-						type = StaticMap.MobileLight;
-						break;
-					case "webDark":
-						type = StaticMap.WebDark;
-						break;
-					case "mobileDark":
-						type = StaticMap.MobileDark;
+					case "mobile":
+						type = StaticMap.Mobile;
 						break;
 					default:
 						return BadRequest("Invalid value for header \"staticMapType\"");
@@ -132,7 +119,6 @@ namespace Actively.Controllers
 
 
 		[HttpPost]
-		[Authorize]
 		public async Task<ActionResult> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
@@ -181,7 +167,6 @@ namespace Actively.Controllers
 		}
 
 		[HttpDelete("{id}")]
-		[Authorize]
 		public async Task<ActionResult<ActivityResponseDto>> DeleteActivity(Guid id)
 		{
 			try
@@ -202,7 +187,6 @@ namespace Actively.Controllers
 			}
 		}
 		[HttpPatch("{id}")]
-		[Authorize]
 		public async Task<ActionResult<ActivityResponseDto>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			try
