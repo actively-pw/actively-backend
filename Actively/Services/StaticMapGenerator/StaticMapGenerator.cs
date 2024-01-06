@@ -15,6 +15,8 @@ namespace Actively.Services.StaticMapGenerator
 		private readonly int _mobileHeight = 750;
 		private readonly string _lightStyle = "streets-v12";
 		private readonly string _darkStyle = "dark-v11";
+		private readonly string _lightLineColor = "fabc49";
+		private readonly string _darkLineColor = "374d2d";
 
 
 		public StaticMapGenerator(IOptions<MapBoxConfig> config)
@@ -46,9 +48,14 @@ namespace Actively.Services.StaticMapGenerator
 		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded, bool darkMode)
 		{
 			string styleName = darkMode? _darkStyle : _lightStyle;
+			string lineColor = darkMode? _darkLineColor : _lightLineColor;
 
 			string url = encoded ? $"mapbox/{styleName}/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
 				$"mapbox/{styleName}/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+
+			//string url = encoded ? $"mapbox/{styleName}/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
+			//	$"mapbox/{styleName}/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+
 
 			using (var client = new HttpClient())
 			{
