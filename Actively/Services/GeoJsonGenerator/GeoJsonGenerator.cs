@@ -34,7 +34,7 @@ namespace Actively.Services.GeoJsonGenerator
 				points = Simplify(points, points.Count / (double)10_000_000);
 			}
 
-			if(points.Count > 300)
+			if(points.Count > 295)
 			{
 				encoded = true;
 				var encodedString = _polylineEncoder.EncodePolyline(points);
