@@ -187,7 +187,7 @@ namespace Actively.Tests.Controllers
 		}
 
 		[Fact]
-		public async Task GetAllActivities_NoActivitiesInDb_ReturnsNotFound()
+		public async Task GetAllActivities_NoActivitiesInDb_ReturnsOkObjectResultAndNullValue()
 		{
 			//arrange
 			PaginationParams @params = A.Dummy<PaginationParams>();
@@ -245,7 +245,8 @@ namespace Actively.Tests.Controllers
 			var result = await controller.GetActivitiesByUserId(staticMapType, @params);
 
 			//assert
-			Assert.IsType<NotFoundResult>(result.Result);
+			Assert.IsType<OkObjectResult>(result.Result);
+			Assert.Null(result.Value);
 		}
 
 		[Theory]
