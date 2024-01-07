@@ -1,10 +1,10 @@
 ﻿using Actively.Models.DTOs;
+using Actively.Models.DTOs.Statistics;
 using Actively.Models.Enums;
-using Actively.Services.StatisticsCalculator;
 
 namespace Actively.Models
 {
-	public class Activity
+    public class Activity
 	{
         public Guid Id { get; set; }
         public User User { get; set; }

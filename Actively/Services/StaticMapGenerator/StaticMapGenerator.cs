@@ -13,6 +13,11 @@ namespace Actively.Services.StaticMapGenerator
 		private readonly int _webHeight = 500;
 		private readonly int _mobileWidth = 1100;
 		private readonly int _mobileHeight = 750;
+		private readonly string _lightStyle = "streets-v12";
+		private readonly string _darkStyle = "dark-v11";
+		private readonly string _lightLineColor = "fabc49";
+		private readonly string _darkLineColor = "374d2d";
+
 
 		public StaticMapGenerator(IOptions<MapBoxConfig> config)
 		{
@@ -31,17 +36,26 @@ namespace Actively.Services.StaticMapGenerator
 					g = g.Replace(" ", "");
 				}
 
-				Stream webLight = await GetStaticMap(g, _webWidth, _webHeight, encoded);
-				Stream mobileLight = await GetStaticMap(g, _mobileWidth, _mobileHeight, encoded);
+				Stream webLight = await GetStaticMap(g, _webWidth, _webHeight, encoded, false);
+				Stream mobileLight = await GetStaticMap(g, _mobileWidth, _mobileHeight, encoded, false);
+				Stream webDark = await GetStaticMap(g, _webWidth, _webHeight, encoded, true);
+				Stream mobileDark = await GetStaticMap(g, _mobileWidth, _mobileHeight, encoded, true);
 
-				return new StaticMapsDto() { MobileLight = mobileLight, WebLight = webLight };
+				return new StaticMapsDto() { MobileLight = mobileLight, WebLight = webLight, WebDark = webDark, MobileDark = mobileDark };
 			}
 		}
 
-		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded)
+		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded, bool darkMode)
 		{
-			string url = encoded ? $"mapbox/streets-v12/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
-				$"mapbox/streets-v12/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+			string styleName = darkMode? _darkStyle : _lightStyle;
+			string lineColor = darkMode? _darkLineColor : _lightLineColor;
+
+			string url = encoded ? $"mapbox/{styleName}/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
+				$"mapbox/{styleName}/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+
+			//string url = encoded ? $"mapbox/{styleName}/static/path({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
+			//	$"mapbox/{styleName}/static/geojson({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";
+
 
 			using (var client = new HttpClient())
 			{

@@ -6,6 +6,7 @@ namespace Actively.Controllers.Repositories.Interfaces
 	public interface IUserRepository
 	{
 		Task<User?> GetUserByEmailAsync(string email);
+		Task<User?> GetUserByIdAsync(Guid id);
 		Task<User> RegisterUserAsync(RegisterUserDto registerUserDto, string hashedPassword);
 
 	}

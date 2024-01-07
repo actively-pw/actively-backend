@@ -1,13 +1,13 @@
 ﻿using Actively.Models;
 using Actively.Models.DTOs;
+using Actively.Models.DTOs.Statistics;
 using Actively.Models.Enums;
-using Actively.Services.StatisticsCalculator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers.Repositories.Interfaces
 {
-	public interface IActivityRepository
+    public interface IActivityRepository
 	{
 		Task<List<Activity>> GetActivitiesByUserId(Guid userId);
 		Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics, Guid userId);

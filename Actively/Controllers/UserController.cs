@@ -146,6 +146,28 @@ namespace Actively.Controllers
 			}
 		}
 
+		[HttpGet("me")]
+		[Authorize]
+		public async Task<ActionResult<UserInfoDto>> GetUserInformation()
+		{
+			try
+			{
+				var accessToken = await HttpContext.GetTokenAsync("access_token");
+				var jwt = _tokenService.GetJwt(accessToken);
+				var userId = jwt.Claims.FirstOrDefault().Value;
+				var userIdGuid = new Guid(userId);
+
+				var user = await _userRepository.GetUserByIdAsync(userIdGuid);
+				if (user is null) return NotFound($"User with id {userId} does not exist");
+
+				return Ok(new UserInfoDto(user));
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Failed to get user information: {ex.Message}");
+			}
+		}
+
 		[HttpGet("summaryStatistics")]
 		[Authorize]
 		public async Task<ActionResult<SummaryStatisticsDto>> GetSummaryStatistics()
