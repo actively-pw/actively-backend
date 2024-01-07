@@ -52,8 +52,6 @@ namespace Actively.Controllers
 				var enumerable = activities.ToList();
 				enumerable.Sort((a, b) => b.Start.CompareTo(a.Start));
 
-				//if (!enumerable.Any()) return NotFound();
-
 				StaticMap type;
 				switch(staticMapType)
 				{
