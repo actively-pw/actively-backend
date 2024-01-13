@@ -14,11 +14,11 @@ namespace Actively.Services.StaticMapGenerator
 		private readonly int _webHeight = 500;
 		private readonly int _mobileWidth = 1100;
 		private readonly int _mobileHeight = 750;
-		private readonly string _lightStyle = "streets-v12";
+		private readonly string _lightStyle = "outdoors-v11";
 		private readonly string _darkStyle = "dark-v11";
-		private readonly string _lightLineColor = "#fabc49";
-		private readonly string _darkLineColor = "#374d2d";
-		private readonly int _lineWidth = 4;
+		private readonly string _lightLineColor = "#374d2d";
+		private readonly string _darkLineColor = "#fabc49";
+		private readonly int _lineWidth = 9;
 
 
 		public StaticMapGenerator(IOptions<MapBoxConfig> config)
