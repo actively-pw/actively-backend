@@ -60,7 +60,6 @@ namespace Actively.BlobStorage
 			var containerClient = new BlobContainerClient(_connectionString, containerName);
 			containerClient.CreateIfNotExistsAsync();
 			return containerClient.GetBlobClient(blobName);
-
 		}
 
 		private async Task DeleteBlob(Guid activityId, BlobType type)

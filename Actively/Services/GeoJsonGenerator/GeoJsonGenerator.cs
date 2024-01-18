@@ -129,7 +129,7 @@ namespace Actively.Services.GeoJsonGenerator
 			}
 		}
 
-		//distamce of a point from a line made from point1 and point2
+		//distance of a point from a line made from point1 and point2
 		private double PerpendicularDistance((double X, double Y) point1, (double X, double Y) point2, (double X, double Y) point)
 		{
 			double area = Math.Abs(0.5 * (point1.X * point2.Y + point2.X * point.Y + point.X * point1.Y - point2.X * point1.Y - point.X * point2.Y - point1.X * point.Y));
