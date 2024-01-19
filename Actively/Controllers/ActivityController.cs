@@ -19,7 +19,7 @@ namespace Actively.Controllers
 {
 	[Authorize]
     [Route("Activities")]
-	[Produces(MediaTypeNames.Application.Json)]
+	[Produces(MediaTypeNames.Application.Json)] // todo czy moze byc tak dla edit? patch
 	[Consumes(MediaTypeNames.Application.Json)]
 	[ApiController]
 	public class ActivityController : Controller
@@ -94,7 +94,17 @@ namespace Actively.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Returns activity with provided ID and its statistics
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="staticMapType"></param>
+		/// <returns>activity with provided ID and its statistics</returns>
 		[HttpGet("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<GetActivityWithsStatisticsDto>> GetActivityById(Guid id, [FromHeader(Name = "staticMapType")] string staticMapType)
 		{
 			try
@@ -124,9 +134,15 @@ namespace Actively.Controllers
 			}
 		}
 
-
-
+		/// <summary>
+		/// Adds new activity based on provided addActivityDto
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <returns>action result</returns>
 		[HttpPost]
+		[ProducesResponseType(StatusCodes.Status200OK)] // czy 201?
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<ActionResult> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
@@ -174,7 +190,16 @@ namespace Actively.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Deletes activity with provided ID
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>the deleted activity</returns>
 		[HttpDelete("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ActivityResponseDto>> DeleteActivity(Guid id)
 		{
 			try
@@ -194,7 +219,18 @@ namespace Actively.Controllers
 				return BadRequest($"Failed to delete activity with id {id}. Exception {ex.Message}");
 			}
 		}
+
+		/// <summary>
+		/// Changes the title of activity with provided ID
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="patchDoc"></param>
+		/// <returns>activity with changed title</returns>
 		[HttpPatch("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ActivityResponseDto>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			try
