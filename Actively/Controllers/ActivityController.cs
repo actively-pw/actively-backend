@@ -13,12 +13,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Net.Mime;
 
 namespace Actively.Controllers
 {
 	[Authorize]
     [Route("Activities")]
+	[Produces(MediaTypeNames.Application.Json)]
+	[Consumes(MediaTypeNames.Application.Json)]
 	[ApiController]
 	public class ActivityController : Controller
 	{
@@ -38,8 +40,16 @@ namespace Actively.Controllers
 			_statisticsCalculator = statisticsCalculator;
 			_tokenService = tokenService;
 		}
-
+		/// <summary>
+		/// Returns a list of activities that have been recorded by a user who is the owner of provided JWT
+		/// </summary>
+		/// <param name="staticMapType"></param>
+		/// <param name="params"></param>
+		/// <returns>a list of user's activities</returns>
 		[HttpGet]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<ActionResult<List<GetActivityDto>>> GetActivitiesByUserId([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try

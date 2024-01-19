@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,7 +43,23 @@ builder.Configuration.AddAzureKeyVault(
 
 builder.Services.AddSwaggerGen(c =>
 {
-	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Actively" });
+	c.SwaggerDoc("v1", new OpenApiInfo
+	{
+		Title = "Actively API",
+		Description = "An ASP.NET Core Web API for final thesis project",
+		License = new OpenApiLicense
+		{
+			Name = "MIT License",
+			Url = new Uri("https://opensource.org/licenses/MIT")
+		},
+		Version = "v1"
+	});
+
+	// generate the xml docs that will drive the swagger docs
+	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+	c.IncludeXmlComments(xmlPath);
 
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
@@ -71,8 +88,7 @@ builder.Services.AddSwaggerGen(c =>
 		}
 	});
 
-}
-);
+});
 
 builder.Services
 	.AddDbContext<ActivelyDbContext>(options =>
