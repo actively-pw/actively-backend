@@ -1,4 +1,5 @@
 using Actively.Controllers;
+using Actively.Controllers.Repositories;
 using Actively.Controllers.Repositories.Interfaces;
 using Actively.Models;
 using Actively.Models.DTOs;
@@ -213,6 +214,127 @@ namespace Actively.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetUserInformation_UserExists_ReturnsOkObjectResult()
+        {
+			//arrange
+			User user = new User("Some name", "Some surname", "email", "password123");
+
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+	            {
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
+			var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+	            _passwordHasher, _statisticsCalculator);
+
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
+
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
+
+            A.CallTo(() => _userRepository.GetUserByIdAsync(user.Id)).Returns(Task.FromResult(user));
+
+			//act
+			var result = await controller.GetUserInformation();
+
+			//assert
+			Assert.IsType<OkObjectResult>(result.Result);
+
+			var objectResult = (ObjectResult)result.Result;
+			var userInfo = objectResult.Value as UserInfoDto;
+
+			Assert.Equal(user.Name, userInfo.Name);
+			Assert.Equal(user.Surname, userInfo.Surname);
+			Assert.Equal(user.Email, userInfo.Email);
+		}
+
+		[Fact]
+		public async Task GetUserInformation_UserDoesNotExists_ReturnsNotFoundObjectResult()
+		{
+			//arrange
+			var user = A.Dummy<User>();
+            User? userRepositoryResult = null;
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var tokenDescriptor = new SecurityTokenDescriptor
+			{
+				Subject = new ClaimsIdentity(new[]
+				{
+					new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email)
+				})
+			};
+
+			JwtSecurityToken jwt = tokenHandler.ReadJwtToken(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+			var authToken = new AuthenticationToken { Name = "access_token", Value = "accessTokenValue" };
+
+			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
+
+			var controller = new UserController(_tokenService, _userRepository, _activityRepository, _refreshTokenRepository,
+				_passwordHasher, _statisticsCalculator);
+
+			controller.ControllerContext = new ControllerContext();
+			var serviceProvider = A.Fake<IServiceProvider>();
+			var authService = A.Fake<IAuthenticationService>();
+			var authResult = AuthenticateResult.Success(
+				new AuthenticationTicket(new ClaimsPrincipal(), string.Empty));
+
+			authResult.Properties!.StoreTokens(new[]
+				{
+					authToken
+				}
+			);
+
+			controller.ControllerContext.HttpContext = new DefaultHttpContext
+			{
+				User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim("userid", user.Id.ToString()),
+					new Claim("email", user.Email) })),
+				RequestServices = serviceProvider
+			};
+
+			A.CallTo(() => authService.AuthenticateAsync(controller.ControllerContext.HttpContext, null)).Returns(authResult);
+
+			A.CallTo(() => serviceProvider.GetService(typeof(IAuthenticationService))).Returns(authService);
+
+			A.CallTo(() => _userRepository.GetUserByIdAsync(user.Id)).Returns(Task.FromResult(userRepositoryResult));
+
+			//act
+			var result = await controller.GetUserInformation();
+
+			//assert
+			Assert.IsType<NotFoundObjectResult>(result.Result);
+		}
+
+		[Fact]
         public async Task GetSummaryStatistics_CorrectData_ReturnsOkObjectResult()
         {
 			//arrange

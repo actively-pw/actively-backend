@@ -90,6 +90,7 @@ namespace Actively.Services.GeoJsonGenerator
 
 		/// <summary>
 		/// Uses the Douglas Peucker algorithm to reduce the number of points.
+		/// Source: <see href="https://www.codeproject.com/Articles/18936/A-C-Implementation-of-Douglas-Peucker-Line-Appro"></see>
 		/// </summary>
 		/// <param name="Points">The points.</param>
 		/// <param name="Tolerance">The tolerance.</param>

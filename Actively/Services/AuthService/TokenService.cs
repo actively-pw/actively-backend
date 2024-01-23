@@ -18,14 +18,14 @@ namespace Actively.Services.AuthService
 	public class TokenService : ITokenService
 	{
 		private readonly JwtConfig _jwtConfig;
-		private readonly ActivelyDbContext _context;
+		private readonly MyFitBookDbContext _context;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TokenService"/> class.
 		/// </summary>
 		/// <param name="jwtConfig"></param>
 		/// <param name="context"></param>
-		public TokenService(IOptions<JwtConfig> jwtConfig, ActivelyDbContext context)
+		public TokenService(IOptions<JwtConfig> jwtConfig, MyFitBookDbContext context)
 		{
 			_jwtConfig = jwtConfig.Value;
 			_context = context;

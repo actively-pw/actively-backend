@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Actively.Migrations
 {
-    [DbContext(typeof(ActivelyDbContext))]
+    [DbContext(typeof(MyFitBookDbContext))]
     [Migration("20231212151351_AddStartPointToActivity")]
     partial class AddStartPointToActivity
     {

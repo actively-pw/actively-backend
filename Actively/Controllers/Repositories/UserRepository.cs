@@ -11,13 +11,13 @@ namespace Actively.Controllers.Repositories
 	/// </summary>
 	public class UserRepository : IUserRepository
 	{
-		private readonly ActivelyDbContext _context;
+		private readonly MyFitBookDbContext _context;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="UserRepository"/> class.
 		/// </summary>
 		/// <param name="context"></param>
-		public UserRepository(ActivelyDbContext context)
+		public UserRepository(MyFitBookDbContext context)
         {
             _context = context;
         }

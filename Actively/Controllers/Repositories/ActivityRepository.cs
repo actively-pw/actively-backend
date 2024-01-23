@@ -16,13 +16,13 @@ namespace Actively.Controllers.Repositories
 	/// </summary>
     public class ActivityRepository : IActivityRepository
 	{
-		private readonly ActivelyDbContext _context;
+		private readonly MyFitBookDbContext _context;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ActivityRepository"/> class.
 		/// </summary>
 		/// <param name="context"></param>
-		public ActivityRepository(ActivelyDbContext context)
+		public ActivityRepository(MyFitBookDbContext context)
 		{
 			_context = context;
 		}

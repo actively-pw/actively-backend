@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
 {
 	c.SwaggerDoc("v1", new OpenApiInfo
 	{
-		Title = "Actively API",
+		Title = "My FitBook API",
 		Description = "An ASP.NET Core Web API for final thesis project",
 		License = new OpenApiLicense
 		{
@@ -91,7 +91,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services
-	.AddDbContext<ActivelyDbContext>(options =>
+	.AddDbContext<MyFitBookDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
 	.Configure<MapBoxConfig>(builder.Configuration.GetSection("MapBox"))

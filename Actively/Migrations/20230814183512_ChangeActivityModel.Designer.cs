@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Actively.Migrations
 {
-    [DbContext(typeof(ActivelyDbContext))]
+    [DbContext(typeof(MyFitBookDbContext))]
     [Migration("20230814183512_ChangeActivityModel")]
     partial class ChangeActivityModel
     {

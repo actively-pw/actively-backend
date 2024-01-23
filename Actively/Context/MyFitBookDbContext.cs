@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Actively.Context
 {
 	/// <summary>
-	/// Class that models Actively database
+	/// Class that models My FitBook database
 	/// </summary>
-	public class ActivelyDbContext : DbContext
+	public class MyFitBookDbContext : DbContext
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ActivelyDbContext"/> class.
+		/// Initializes a new instance of the <see cref="MyFitBookDbContext"/> class.
 		/// </summary>
 		/// <param name="options"></param>
-		public ActivelyDbContext(DbContextOptions options) : base(options)
+		public MyFitBookDbContext(DbContextOptions options) : base(options)
 		{
 		}
 
