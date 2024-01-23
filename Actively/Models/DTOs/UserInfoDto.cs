@@ -1,4 +1,6 @@
-﻿namespace Actively.Models.DTOs
+﻿using MyFitBook.Models;
+
+namespace MyFitBook.Models.DTOs
 {
 	public class UserInfoDto
 	{

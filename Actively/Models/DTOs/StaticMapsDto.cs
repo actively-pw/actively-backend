@@ -1,4 +1,4 @@
-﻿namespace Actively.Models.DTOs
+﻿namespace MyFitBook.Models.DTOs
 {
 	public class StaticMapsDto : IDisposable
 	{
@@ -7,7 +7,7 @@
 		public Stream WebDark { get; set; }
 		public Stream MobileDark { get; set; }
 
-		public void Dispose() 
+		public void Dispose()
 		{
 			WebLight?.Dispose();
 			MobileLight?.Dispose();

@@ -1,18 +1,31 @@
-﻿using Actively.Models.DTOs;
-using Actively.Services.GeoJsonGenerator.Interfaces;
-using Actively.Services.PolylineHelpers.Interfaces;
+﻿using MyFitBook.Models.DTOs;
+using MyFitBook.Services.GeoJsonGenerator.Interfaces;
+using MyFitBook.Services.PolylineHelpers.Interfaces;
 
-namespace Actively.Services.GeoJsonGenerator
+namespace MyFitBook.Services.GeoJsonGenerator
 {
+	/// <summary>
+	/// Classes that generates geoJSON files
+	/// </summary>
 	public class GeoJsonGenerator : IGeoJsonGenerator
 	{
 		private readonly IPolylineEncoder _polylineEncoder;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="GeoJsonGenerator"/> class.
+		/// </summary>
+		/// <param name="polylineEncoder"></param>
 		public GeoJsonGenerator(IPolylineEncoder polylineEncoder)
 		{
 			_polylineEncoder = polylineEncoder;
 		}
 
+		/// <summary>
+		/// Generates geoJSON file based on values of <c>AddActivityDto</c>
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <param name="encoded"></param>
+		/// <returns></returns>
 		public (MemoryStream geojson, MemoryStream? encodedPolyline) Generate(AddActivityDto addActivityDto, out bool encoded)
 		{
 			encoded = false;
@@ -20,21 +33,21 @@ namespace Actively.Services.GeoJsonGenerator
 
 			// convert addActivityDto.Route to list of points
 			List<(double X, double Y)> points = new();
-			foreach(var slice in addActivityDto.Route)
+			foreach (var slice in addActivityDto.Route)
 			{
-				foreach(var location in slice.Locations)
+				foreach (var location in slice.Locations)
 				{
 					points.Add((Math.Round(location.Longitude, 5), Math.Round(location.Latitude, 5)));
 				}
 			}
 
 			//simplify geojson if totalPointsCount is big
-			if(points.Count > 600)
+			if (points.Count > 600)
 			{
 				points = Simplify(points, points.Count / (double)10_000_000);
 			}
 
-			if(points.Count > 295)
+			if (points.Count > 295)
 			{
 				encoded = true;
 				var encodedString = _polylineEncoder.EncodePolyline(points);
@@ -50,7 +63,7 @@ namespace Actively.Services.GeoJsonGenerator
 
 			writer.Write("{\n\"type\":\"LineString\",\n\"coordinates\":\n[\n");
 
-			for(int i=0; i< points.Count; i++)
+			for (int i = 0; i < points.Count; i++)
 			{
 				writer.Write("[");
 				writer.Write(points[i].X);
@@ -75,7 +88,14 @@ namespace Actively.Services.GeoJsonGenerator
 			return (stream, encodedPolyline);
 		}
 
-		// Douglas-Peucker Line Approximation Algorithm
+		/// <summary>
+		/// Uses the Douglas Peucker algorithm to reduce the number of points.
+		/// Source: <see href="https://www.codeproject.com/Articles/18936/A-C-Implementation-of-Douglas-Peucker-Line-Appro"></see>
+		/// </summary>
+		/// <param name="points">The points.</param>
+		/// <param name="tolerance">The tolerance.</param>
+		/// <returns></returns>
+
 		private List<(double X, double Y)> Simplify(List<(double X, double Y)> points, double tolerance)
 		{
 			if (points is null || points.Count < 3) return points;
@@ -98,29 +118,38 @@ namespace Actively.Services.GeoJsonGenerator
 
 			List<(double X, double Y)> simplified = new();
 			pointIndicesToKeep.Sort();
-            foreach (var index in pointIndicesToKeep)
-            {
+			foreach (var index in pointIndicesToKeep)
+			{
 				simplified.Add(points[index]);
-            }
+			}
 
-            return simplified;
+			return simplified;
 		}
+
+		/// <summary>
+		/// Douglases the peucker reduction.
+		/// </summary>
+		/// <param name="points"></param>
+		/// <param name="firstPoint"></param>
+		/// <param name="lastPoint"></param>
+		/// <param name="tolerance"></param>
+		/// <param name="pointIndicesToKeep"></param>
 
 		private void DouglasPeuckerReduction(List<(double X, double Y)> points, int firstPoint, int lastPoint, double tolerance, ref List<int> pointIndicesToKeep)
 		{
 			double maxDistance = 0;
 			int indexFurthest = 0;
-			for(int i=firstPoint; i<lastPoint; i++)
+			for (int i = firstPoint; i < lastPoint; i++)
 			{
 				double distance = PerpendicularDistance(points[firstPoint], points[lastPoint], points[i]);
-				if(distance > maxDistance)
+				if (distance > maxDistance)
 				{
 					maxDistance = distance;
 					indexFurthest = i;
 				}
 			}
 
-			if(maxDistance > tolerance && indexFurthest!=0)
+			if (maxDistance > tolerance && indexFurthest != 0)
 			{
 				// add the largest point that exceeds the tolerance
 				pointIndicesToKeep.Add(indexFurthest);
@@ -129,7 +158,14 @@ namespace Actively.Services.GeoJsonGenerator
 			}
 		}
 
-		//distamce of a point from a line made from point1 and point2
+
+		/// <summary>
+		/// The distance of a point from a line made from point1 and point2.
+		/// </summary>
+		/// <param name="point1"></param>
+		/// <param name="point2"></param>
+		/// <param name="point"></param>
+		/// <returns></returns>
 		private double PerpendicularDistance((double X, double Y) point1, (double X, double Y) point2, (double X, double Y) point)
 		{
 			double area = Math.Abs(0.5 * (point1.X * point2.Y + point2.X * point.Y + point.X * point1.Y - point2.X * point1.Y - point.X * point2.Y - point1.X * point.Y));

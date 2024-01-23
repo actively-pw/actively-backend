@@ -1,8 +1,11 @@
-﻿using Actively.Models;
-using Actively.Models.DTOs;
+﻿using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
 
-namespace Actively.Controllers.Repositories.Interfaces
+namespace MyFitBook.Controllers.Repositories.Interfaces
 {
+	/// <summary>
+	/// Interface for classes used for database management and queries related to users
+	/// </summary>
 	public interface IUserRepository
 	{
 		Task<User?> GetUserByEmailAsync(string email);

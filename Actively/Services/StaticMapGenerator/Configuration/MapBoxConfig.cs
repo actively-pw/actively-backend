@@ -1,5 +1,8 @@
-﻿namespace Actively.Services.StaticMapGenerator.Configuration
+﻿namespace MyFitBook.Services.StaticMapGenerator.Configuration
 {
+	/// <summary>
+	/// Class for storing Mapbox configuration data
+	/// </summary>
 	public class MapBoxConfig
 	{
 		public string StaticImagesToken { get; set; }

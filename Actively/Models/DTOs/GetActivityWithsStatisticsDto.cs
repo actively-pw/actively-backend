@@ -1,9 +1,9 @@
-﻿using Actively.Models.Enums;
+﻿using MyFitBook.Models.Enums;
 
-namespace Actively.Models.DTOs
+namespace MyFitBook.Models.DTOs
 {
-    public class GetActivityWithsStatisticsDto
-    {
+	public class GetActivityWithsStatisticsDto
+	{
 		public Guid Id { get; set; }
 		public string? Title { get; set; }
 		public string Sport { get; set; }
@@ -50,14 +50,14 @@ namespace Actively.Models.DTOs
 		public double MaxSpeed { get; set; }
 		public int SumOfAscent { get; set; }
 		public int SumOfDescent { get; set; }
-        public DetailedStats(long totalTime, double distance, double averageSpeed, double maxSpeed, int sumOfAscent, int sumOfDescent)
-        {
-			TotalTime  = totalTime;
+		public DetailedStats(long totalTime, double distance, double averageSpeed, double maxSpeed, int sumOfAscent, int sumOfDescent)
+		{
+			TotalTime = totalTime;
 			Distance = distance;
 			AverageSpeed = averageSpeed;
 			MaxSpeed = maxSpeed;
 			SumOfAscent = sumOfAscent;
 			SumOfDescent = sumOfDescent;
-        }
-    }
+		}
+	}
 }

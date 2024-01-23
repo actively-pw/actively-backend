@@ -1,16 +1,34 @@
-﻿using Actively.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MyFitBook.Models;
 
-namespace Actively.Context
+namespace MyFitBook.Context
 {
-	public class ActivelyDbContext : DbContext
+	/// <summary>
+	/// Class that models My FitBook database
+	/// </summary>
+	public class MyFitBookDbContext : DbContext
 	{
-		public ActivelyDbContext(DbContextOptions options) : base(options)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MyFitBookDbContext"/> class.
+		/// </summary>
+		/// <param name="options"></param>
+		public MyFitBookDbContext(DbContextOptions options) : base(options)
 		{
 		}
 
+		/// <summary>
+		/// Property that models Activities table in Actively database
+		/// </summary>
 		public DbSet<Activity> Activities { get; set; }
+
+		/// <summary>
+		/// Property that models Users table in Actively database
+		/// </summary>
 		public DbSet<User> Users { get; set; }
+
+		/// <summary>
+		/// Property that models RefreshTokens table in Actively database
+		/// </summary>
 		public DbSet<UserRefreshToken> RefreshTokens { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

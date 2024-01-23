@@ -1,13 +1,23 @@
-﻿using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Services.StatisticsCalculator.Interfaces;
+﻿using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
 using System.Numerics;
 
-namespace Actively.Services.StatisticsCalculator
+namespace MyFitBook.Services.StatisticsCalculator
 {
-    public class StatisticsCalculator : IStatisticsCalculator
+	/// <summary>
+	/// Helper class used for calculating activity and summary statistics
+	/// </summary>
+	public class StatisticsCalculator : IStatisticsCalculator
 	{
+		private const int _defaultPointsInFragmentCount = 30;
+
+		/// <summary>
+		/// Calculates activity statistics
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <returns></returns>
 		public ActivityStatistics Calculate(AddActivityDto addActivityDto)
 		{
 			var totalDistanceKilometers = 0.0;
@@ -17,30 +27,30 @@ namespace Actively.Services.StatisticsCalculator
 			var sumOfDescent = 0.0;
 
 			int totalPointsCount = 0;
-			foreach(var slice in addActivityDto.Route)
+			foreach (var slice in addActivityDto.Route)
 			{
 				totalPointsCount += slice.Locations.Length;
 			}
 
-			int pointsCount = totalPointsCount >= 30 ? 30 : totalPointsCount;
+			int pointsInFragmentCount = totalPointsCount >= _defaultPointsInFragmentCount ? _defaultPointsInFragmentCount : totalPointsCount;
 
-			foreach(var slice in addActivityDto.Route) // liczenie czasu
+			foreach (var slice in addActivityDto.Route) // calculate time
 			{
 				if (slice.Locations.Length == 0) continue;
 
 				// time between start/resume of recording till first location update
 				durationMilliseconds += (slice.Locations[0].TimeStamp - slice.Start).TotalMilliseconds;
 
-				for (int i=0; i<slice.Locations.Length-1; i++)
+				for (int i = 0; i < slice.Locations.Length - 1; i++)
 				{
 					durationMilliseconds += (slice.Locations[i + 1].TimeStamp - slice.Locations[i].TimeStamp).TotalMilliseconds;
 				}
 			}
 
-			foreach (var slice in addActivityDto.Route) // liczenie predkosci
+			foreach (var slice in addActivityDto.Route) // calculate speeds
 			{
 				if (slice.Locations.Length == 0) continue;
-				var locations = slice.Locations;				
+				var locations = slice.Locations;
 
 				var vectorsToAverageOld = new Vector2(0.0f, 0.0f);
 
@@ -50,59 +60,39 @@ namespace Actively.Services.StatisticsCalculator
 					double speed = 0;
 					double passedTimeH = 0;
 
-					if (i < locations.Length - pointsCount) //dlugosc wektora - i > liczba punktow
+					if (i < locations.Length - pointsInFragmentCount)
 					{
 						var vectorsToAverage = vectorsToAverageOld;
 						double averageTime = 0.0;
-						for (int j = 0; j < pointsCount - 1; j++)
+						for (int j = 0; j < pointsInFragmentCount - 1; j++)
 						{
-							vectorsToAverage += LocationOperations.ProjectedDistance(locations[i+j], locations[i + j+1], DistanceUnit.Kilometers);
-							//averageTime += (locations[i + j].TimeStamp - locations[i].TimeStamp).TotalHours;
+							vectorsToAverage += LocationOperations.ProjectedDistance(locations[i + j], locations[i + j + 1], DistanceUnit.Kilometers);
 						}
-						//vectorsToAverage = vectorsToAverage / 5.0f;
-						averageTime = (locations[i + pointsCount].TimeStamp - locations[i].TimeStamp).TotalHours;
-						distanceKm = (vectorsToAverage - vectorsToAverageOld).Length(); // czy dla old (0,0,0) jest ok?
+						averageTime = (locations[i + pointsInFragmentCount].TimeStamp - locations[i].TimeStamp).TotalHours;
+						distanceKm = (vectorsToAverage - vectorsToAverageOld).Length();
 						vectorsToAverageOld = vectorsToAverage;
 						var loc1 = locations[i];
-						var loc2 = locations[i + pointsCount];
+						var loc2 = locations[i + pointsInFragmentCount];
 
 						passedTimeH = (loc2.TimeStamp - loc1.TimeStamp).TotalHours;
 						speed = passedTimeH == 0 ? 0.0 : distanceKm / averageTime;
-						//if (i % pointsCount == 0)
-						//{
-						//	durationMilliseconds += passedTimeH * 60 * 60 * 1000;
-						//}
 					}
 					else
 					{
-						//if (i < locations.Length-2)
-						//{
-						//	var loc1_final = locations[i];
-						//	var loc2_final = locations[i + 1];
-
-						//	//passedTimeH = (loc2_final.TimeStamp - loc1_final.TimeStamp).TotalHours;
-						//	//durationMilliseconds += passedTimeH * 60 * 60 * 1000;
-						//}
-						//else
-						//{
-						//	passedTimeH = 0.0;
-						//}
-						 //todo
 						distanceKm = 0.0;
 					}
-		
+
 					if (speed > maxSpeed)
 					{
 						maxSpeed = speed;
 					}
 
-					if(i%pointsCount == 0) totalDistanceKilometers += distanceKm;
-
-					// conversion to ms
+					if (i % pointsInFragmentCount == 0) totalDistanceKilometers += distanceKm;
 
 					var loc1alt = locations[i];
 					var loc2alt = locations[i + 1];
 					var altitudeDifference = loc2alt.Altitude - loc1alt.Altitude;
+
 					if (altitudeDifference > 0)
 					{
 						sumOfAscent += altitudeDifference;
@@ -124,6 +114,13 @@ namespace Actively.Services.StatisticsCalculator
 			);
 		}
 
+		/// <summary>
+		/// Calculates sport summary statistics
+		/// </summary>
+		/// <param name="lastWeekActivities"></param>
+		/// <param name="lastYearActivities"></param>
+		/// <param name="allTimeActivities"></param>
+		/// <returns></returns>
 		public (WeeklyStatisticsDto, YearToDateStatisticsDto, AllTimeStatisticsDto) CalculateSportSummary(List<Activity> lastWeekActivities,
 			List<Activity> lastYearActivities, List<Activity> allTimeActivities)
 		{
@@ -152,6 +149,11 @@ namespace Actively.Services.StatisticsCalculator
 			return (weekStatistics, yearStatistics, allTimeStatistics);
 		}
 
+		/// <summary>
+		/// Calculates total time of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private long CalculateTotalTime(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
@@ -166,27 +168,37 @@ namespace Actively.Services.StatisticsCalculator
 			return totalTime;
 		}
 
+		/// <summary>
+		/// Calculates total distance of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private double CalculateDistance(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
 
 			double distance = 0;
 
-			foreach(var activity in activities)
+			foreach (var activity in activities)
 			{
-				distance+= activity.Distance;
+				distance += activity.Distance;
 			}
 
 			return distance;
 		}
 
+		/// <summary>
+		/// Calculates total elevation gain of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private int CalculateElevationGain(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
 
 			int elevationGain = 0;
 
-			foreach(var activity in activities)
+			foreach (var activity in activities)
 			{
 				elevationGain += activity.SumOfAscent;
 			}
@@ -194,12 +206,23 @@ namespace Actively.Services.StatisticsCalculator
 			return elevationGain;
 		}
 
+		/// <summary>
+		/// Returns distance of activity with the biggest distance
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private double CalculateLongestDistance(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
 			return activities.Max(a => a.Distance);
 		}
 
+		/// <summary>
+		/// Calculates average speed in km/h
+		/// </summary>
+		/// <param name="distanceMeters"></param>
+		/// <param name="durationMilliseconds"></param>
+		/// <returns></returns>
 		private double CalcAvgSpeed(double distanceMeters, double durationMilliseconds)
 		{
 			if (Math.Abs(durationMilliseconds) <= double.Epsilon) return 0.0;
@@ -209,6 +232,9 @@ namespace Actively.Services.StatisticsCalculator
 		}
 	}
 
+	/// <summary>
+	/// Helper class for basic <c>Location</c> operations
+	/// </summary>
 	public static class LocationOperations
 	{
 		private static readonly Dictionary<DistanceUnit, double> _factors = new()
@@ -217,19 +243,13 @@ namespace Actively.Services.StatisticsCalculator
 			{ DistanceUnit.Kilometers, 6373d },
 		};
 
-		public static double Distance(Location a, Location b, DistanceUnit unit)
-		{
-			double difLat = DegreesToRadians(b.Latitude - a.Latitude);
-			double difLon = DegreesToRadians(b.Longitude - a.Longitude);
-			double lat1 = DegreesToRadians(a.Latitude);
-			double lat2 = DegreesToRadians(b.Latitude);
-
-			double value = Math.Pow(Math.Sin(difLat / 2), 2) +
-						   Math.Pow(Math.Sin(difLon / 2), 2) * Math.Cos(lat1) * Math.Cos(lat2);
-
-			return RadiansToMeters(2 * Math.Atan2(Math.Sqrt(value), Math.Sqrt(1 - value)), unit);
-		}
-
+		/// <summary>
+		/// Calculates projected distance from <c>a</c> to <c>b</c> in provided <c>unit</c>
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <param name="unit"></param>
+		/// <returns></returns>
 		public static Vector2 ProjectedDistance(Location a, Location b, DistanceUnit unit)
 		{
 			double difLat = DegreesToRadians(b.Latitude - a.Latitude);

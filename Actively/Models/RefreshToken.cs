@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Actively.Models
+namespace MyFitBook.Models
 {
 	public class UserRefreshToken
 	{

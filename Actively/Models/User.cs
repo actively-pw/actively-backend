@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Actively.Models
+namespace MyFitBook.Models
 {
 	public class User
 	{

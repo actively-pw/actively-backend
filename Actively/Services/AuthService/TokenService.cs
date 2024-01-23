@@ -1,28 +1,43 @@
-﻿using Actively.Context;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Services.AuthService.Configuration;
-using Actively.Services.AuthService.Interfaces;
+﻿using MyFitBook.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MyFitBook.Context;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Services.AuthService.Configuration;
+using MyFitBook.Services.AuthService.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Actively.Services.AuthService
+namespace MyFitBook.Services.AuthService
 {
+	/// <summary>
+	/// Class that provides basic operations on JWTs
+	/// </summary>
 	public class TokenService : ITokenService
 	{
 		private readonly JwtConfig _jwtConfig;
-		private readonly ActivelyDbContext _context;
+		private readonly MyFitBookDbContext _context;
 
-		public TokenService(IOptions<JwtConfig> jwtConfig, ActivelyDbContext context)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TokenService"/> class.
+		/// </summary>
+		/// <param name="jwtConfig"></param>
+		/// <param name="context"></param>
+		public TokenService(IOptions<JwtConfig> jwtConfig, MyFitBookDbContext context)
 		{
 			_jwtConfig = jwtConfig.Value;
 			_context = context;
 		}
 
+		/// <summary>
+		/// Returns provided user's access and refresh tokens
+		/// </summary>
+		/// <param name="user"></param>
+		/// <param name="ipAddress"></param>
+		/// <returns></returns>
 		public async Task<TokensDto> GetTokens(User user, string ipAddress)
 		{
 			string jwt = GenerateJwt(user);
@@ -38,7 +53,7 @@ namespace Actively.Services.AuthService
 				Token = jwt,
 				UserId = user.Id
 			};
-			
+
 			await _context.RefreshTokens.AddAsync(refreshToken);
 			await _context.SaveChangesAsync();
 
@@ -49,12 +64,22 @@ namespace Actively.Services.AuthService
 			};
 		}
 
+		/// <summary>
+		/// Converts <c>string</c> to <c>JwtSecurityTokenHandler</c>
+		/// </summary>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		public JwtSecurityToken GetJwt(string token)
 		{
 			JwtSecurityTokenHandler tokenHander = new JwtSecurityTokenHandler();
 			return tokenHander.ReadJwtToken(token);
 		}
 
+		/// <summary>
+		/// Generates new JWT for provided user
+		/// </summary>
+		/// <param name="user"></param>
+		/// <returns></returns>
 		private string GenerateJwt(User user)
 		{
 			var tokenHandler = new JwtSecurityTokenHandler();
@@ -79,6 +104,10 @@ namespace Actively.Services.AuthService
 			return tokenHandler.WriteToken(token);
 		}
 
+		/// <summary>
+		/// Generates new refresh token
+		/// </summary>
+		/// <returns></returns>
 		private string GenerateRefreshToken()
 		{
 			var byteArray = RandomNumberGenerator.GetBytes(64);

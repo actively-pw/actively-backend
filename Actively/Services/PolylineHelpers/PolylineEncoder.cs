@@ -1,16 +1,28 @@
-﻿using Actively.Services.PolylineHelpers.Interfaces;
+﻿using MyFitBook.Services.PolylineHelpers.Interfaces;
 using System.Text;
 using System.Web;
 
-namespace Actively.Services.PolylineHelpers
+namespace MyFitBook.Services.PolylineHelpers
 {
+	/// <summary>
+	/// Helper class that encodes polylines using 
+	/// <see href="https://developers.google.com/maps/documentation/utilities/polylinealgorithm">
+	/// Google Polyline Encoding Algorithm</see>
+	/// </summary>
 	public class PolylineEncoder : IPolylineEncoder
 	{
+		/// <summary>
+		/// Encodes polylines using 
+		/// <see href="https://developers.google.com/maps/documentation/utilities/polylinealgorithm">
+		/// Google Polyline Encoding Algorithm</see>
+		/// </summary>
+		/// <param name="polyline"></param>
+		/// <returns></returns>
 		public string EncodePolyline(List<(double x, double y)> polyline)
 		{
 			List<(double x, double y)> polylineCopy = new();
 
-			for (int i=0; i<polyline.Count; i++)
+			for (int i = 0; i < polyline.Count; i++)
 			{
 				polylineCopy.Add((polyline[i].y, polyline[i].x));
 			}
@@ -55,7 +67,7 @@ namespace Actively.Services.PolylineHelpers
 			for (int i = 0; i < chunks.Length; i++)
 			{
 				var shift = (chunks.Length - 1 - i) * 5;
-				chunks[i] = (value & (0b_11111 << shift)) >> shift;
+				chunks[i] = (value & 0b_11111 << shift) >> shift;
 			}
 
 			return chunks;

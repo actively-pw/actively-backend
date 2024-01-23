@@ -1,28 +1,29 @@
-using Actively.BlobStorage;
-using Actively.BlobStorage.Interfaces;
-using Actively.Context;
-using Actively.Controllers.Repositories;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Services.AuthService;
-using Actively.Services.AuthService.Configuration;
-using Actively.Services.AuthService.Interfaces;
-using Actively.Services.GeoJsonGenerator;
-using Actively.Services.GeoJsonGenerator.Interfaces;
-using Actively.Services.InputFormatters;
-using Actively.Services.PasswordHasher;
-using Actively.Services.PasswordHasher.Interfaces;
-using Actively.Services.PolylineHelpers;
-using Actively.Services.PolylineHelpers.Interfaces;
-using Actively.Services.StaticMapGenerator;
-using Actively.Services.StaticMapGenerator.Configuration;
-using Actively.Services.StaticMapGenerator.Interfaces;
-using Actively.Services.StatisticsCalculator;
-using Actively.Services.StatisticsCalculator.Interfaces;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MyFitBook.BlobStorage;
+using MyFitBook.BlobStorage.Interfaces;
+using MyFitBook.Context;
+using MyFitBook.Controllers.Repositories;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Services.AuthService;
+using MyFitBook.Services.AuthService.Configuration;
+using MyFitBook.Services.AuthService.Interfaces;
+using MyFitBook.Services.GeoJsonGenerator;
+using MyFitBook.Services.GeoJsonGenerator.Interfaces;
+using MyFitBook.Services.InputFormatters;
+using MyFitBook.Services.PasswordHasher;
+using MyFitBook.Services.PasswordHasher.Interfaces;
+using MyFitBook.Services.PolylineHelpers;
+using MyFitBook.Services.PolylineHelpers.Interfaces;
+using MyFitBook.Services.StaticMapGenerator;
+using MyFitBook.Services.StaticMapGenerator.Configuration;
+using MyFitBook.Services.StaticMapGenerator.Interfaces;
+using MyFitBook.Services.StatisticsCalculator;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +32,7 @@ builder.Services.AddControllers(options =>
 {
 	options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
 });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 
 
@@ -42,7 +43,23 @@ builder.Configuration.AddAzureKeyVault(
 
 builder.Services.AddSwaggerGen(c =>
 {
-	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Actively" });
+	c.SwaggerDoc("v1", new OpenApiInfo
+	{
+		Title = "My FitBook API",
+		Description = "An ASP.NET Core Web API for final thesis project",
+		License = new OpenApiLicense
+		{
+			Name = "MIT License",
+			Url = new Uri("https://opensource.org/licenses/MIT")
+		},
+		Version = "v1"
+	});
+
+	// generate the xml docs that will drive the swagger docs
+	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+	c.IncludeXmlComments(xmlPath);
 
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
@@ -71,11 +88,10 @@ builder.Services.AddSwaggerGen(c =>
 		}
 	});
 
-}
-);
+});
 
 builder.Services
-	.AddDbContext<ActivelyDbContext>(options =>
+	.AddDbContext<MyFitBookDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetSection("DbAzure").Value!))
 	.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"))
 	.Configure<MapBoxConfig>(builder.Configuration.GetSection("MapBox"))
@@ -119,8 +135,8 @@ var app = builder.Build();
 
 
 app.UseSwagger();
-app.UseSwaggerUI();
 
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

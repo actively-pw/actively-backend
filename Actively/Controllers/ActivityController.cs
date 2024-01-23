@@ -1,24 +1,26 @@
-﻿using Actively.BlobStorage;
-using Actively.BlobStorage.Interfaces;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Models.Enums;
-using Actively.Services.AuthService.Interfaces;
-using Actively.Services.GeoJsonGenerator.Interfaces;
-using Actively.Services.StaticMapGenerator.Interfaces;
-using Actively.Services.StatisticsCalculator.Interfaces;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using MyFitBook.BlobStorage;
+using MyFitBook.BlobStorage.Interfaces;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Models.Enums;
+using MyFitBook.Services.AuthService.Interfaces;
+using MyFitBook.Services.GeoJsonGenerator.Interfaces;
+using MyFitBook.Services.StaticMapGenerator.Interfaces;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
+using System.Net.Mime;
 
-
-namespace Actively.Controllers
+namespace MyFitBook.Controllers
 {
 	[Authorize]
-    [Route("Activities")]
+	[Route("Activities")]
+	[Produces(MediaTypeNames.Application.Json)] // todo czy moze byc tak dla edit? patch
+	[Consumes(MediaTypeNames.Application.Json)]
 	[ApiController]
 	public class ActivityController : Controller
 	{
@@ -28,6 +30,16 @@ namespace Actively.Controllers
 		private readonly IStaticMapGenerator _staticMapGenerator;
 		private readonly IStatisticsCalculator _statisticsCalculator;
 		private readonly ITokenService _tokenService;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ActivityController"/> class.
+		/// </summary>
+		/// <param name="activityRepository"></param>
+		/// <param name="blobStorage"></param>
+		/// <param name="geoJsonGenerator"></param>
+		/// <param name="staticMapGenerator"></param>
+		/// <param name="statisticsCalculator"></param>
+		/// <param name="tokenService"></param>
 		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator,
 			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator, ITokenService tokenService)
 		{
@@ -38,8 +50,16 @@ namespace Actively.Controllers
 			_statisticsCalculator = statisticsCalculator;
 			_tokenService = tokenService;
 		}
-
+		/// <summary>
+		/// Returns a list of activities that have been recorded by a user who is the owner of provided JWT
+		/// </summary>
+		/// <param name="staticMapType"></param>
+		/// <param name="params"></param>
+		/// <returns>a list of user's activities</returns>
 		[HttpGet]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<ActionResult<List<GetActivityDto>>> GetActivitiesByUserId([FromHeader(Name = "staticMapType")] string staticMapType, [FromQuery] PaginationParams @params)
 		{
 			try
@@ -53,7 +73,7 @@ namespace Actively.Controllers
 				enumerable.Sort((a, b) => b.Start.CompareTo(a.Start));
 
 				StaticMap type;
-				switch(staticMapType)
+				switch (staticMapType)
 				{
 					case "web":
 						type = StaticMap.Web;
@@ -70,7 +90,7 @@ namespace Actively.Controllers
 				.Skip((@params.Page - 1) * @params.ItemsPerPage)
 				.Take(@params.ItemsPerPage);
 
-				int totalPagesCount = (int)Math.Ceiling((double)_activityRepository.GetActivitiesCount() / @params.ItemsPerPage);
+				int totalPagesCount = (int)Math.Ceiling((double)activities.Count / @params.ItemsPerPage);
 
 				int nextPage = @params.Page < totalPagesCount ? @params.Page + 1 : -1;
 
@@ -84,7 +104,17 @@ namespace Actively.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Returns activity with provided ID and its statistics
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="staticMapType"></param>
+		/// <returns>activity with provided ID and its statistics</returns>
 		[HttpGet("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<GetActivityWithsStatisticsDto>> GetActivityById(Guid id, [FromHeader(Name = "staticMapType")] string staticMapType)
 		{
 			try
@@ -114,9 +144,15 @@ namespace Actively.Controllers
 			}
 		}
 
-
-
+		/// <summary>
+		/// Adds new activity based on provided addActivityDto
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <returns>action result</returns>
 		[HttpPost]
+		[ProducesResponseType(StatusCodes.Status200OK)] // czy 201?
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<ActionResult> AddActivity(AddActivityDto addActivityDto)
 		{
 			try
@@ -164,7 +200,16 @@ namespace Actively.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Deletes activity with provided ID
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>the deleted activity</returns>
 		[HttpDelete("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ActivityResponseDto>> DeleteActivity(Guid id)
 		{
 			try
@@ -184,7 +229,18 @@ namespace Actively.Controllers
 				return BadRequest($"Failed to delete activity with id {id}. Exception {ex.Message}");
 			}
 		}
+
+		/// <summary>
+		/// Changes the title of activity with provided ID
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="patchDoc"></param>
+		/// <returns>activity with changed title</returns>
 		[HttpPatch("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ActivityResponseDto>> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			try
