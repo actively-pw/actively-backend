@@ -17,7 +17,6 @@ namespace MyFitBook.Controllers.Repositories.Interfaces
 		Task<Activity?> GetActivityById(Guid id);
 		Task<Activity> DeleteActivity(Guid id);
 		Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc);
-		int GetActivitiesCount();
 		Task<List<Activity>> GetActivitiesBySport(Sport sport, Guid userId);
 		Task<List<Activity>> GetLatestActivitiesByDaysCountAndSport(int daysCount, Sport sport, Guid userId);
 	}

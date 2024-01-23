@@ -288,7 +288,7 @@ namespace MyFitBook.Tests.Controllers
 			HttpResponse response = A.Fake<HttpResponse>();
 
 			A.CallTo(() => _activityRepository.GetActivitiesByUserId(user.Id)).Returns(Task.FromResult(activitiesList));
-			A.CallTo(() => _activityRepository.GetActivitiesCount()).Returns(itemsCount);
+
 			A.CallTo(() => _tokenService.GetJwt("accessTokenValue")).Returns(jwt);
 
 			var controller = new ActivityController(_activityRepository, _blobStorage, _geoJsonGenerator,

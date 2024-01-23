@@ -90,7 +90,7 @@ namespace MyFitBook.Controllers
 				.Skip((@params.Page - 1) * @params.ItemsPerPage)
 				.Take(@params.ItemsPerPage);
 
-				int totalPagesCount = (int)Math.Ceiling((double)_activityRepository.GetActivitiesCount() / @params.ItemsPerPage);
+				int totalPagesCount = (int)Math.Ceiling((double)activities.Count / @params.ItemsPerPage);
 
 				int nextPage = @params.Page < totalPagesCount ? @params.Page + 1 : -1;
 
