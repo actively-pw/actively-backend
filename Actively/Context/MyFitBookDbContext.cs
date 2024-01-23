@@ -1,7 +1,7 @@
-﻿using Actively.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MyFitBook.Models;
 
-namespace Actively.Context
+namespace MyFitBook.Context
 {
 	/// <summary>
 	/// Class that models My FitBook database

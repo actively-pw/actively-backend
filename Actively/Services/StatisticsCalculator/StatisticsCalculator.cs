@@ -1,15 +1,15 @@
-﻿using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Services.StatisticsCalculator.Interfaces;
+﻿using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
 using System.Numerics;
 
-namespace Actively.Services.StatisticsCalculator
+namespace MyFitBook.Services.StatisticsCalculator
 {
 	/// <summary>
 	/// Helper class used for calculating activity and summary statistics
 	/// </summary>
-    public class StatisticsCalculator : IStatisticsCalculator
+	public class StatisticsCalculator : IStatisticsCalculator
 	{
 		private const int _defaultPointsInFragmentCount = 30;
 
@@ -27,21 +27,21 @@ namespace Actively.Services.StatisticsCalculator
 			var sumOfDescent = 0.0;
 
 			int totalPointsCount = 0;
-			foreach(var slice in addActivityDto.Route)
+			foreach (var slice in addActivityDto.Route)
 			{
 				totalPointsCount += slice.Locations.Length;
 			}
 
 			int pointsInFragmentCount = totalPointsCount >= _defaultPointsInFragmentCount ? _defaultPointsInFragmentCount : totalPointsCount;
 
-			foreach(var slice in addActivityDto.Route) // calculate time
+			foreach (var slice in addActivityDto.Route) // calculate time
 			{
 				if (slice.Locations.Length == 0) continue;
 
 				// time between start/resume of recording till first location update
 				durationMilliseconds += (slice.Locations[0].TimeStamp - slice.Start).TotalMilliseconds;
 
-				for (int i=0;  i< slice.Locations.Length - 1; i++)
+				for (int i = 0; i < slice.Locations.Length - 1; i++)
 				{
 					durationMilliseconds += (slice.Locations[i + 1].TimeStamp - slice.Locations[i].TimeStamp).TotalMilliseconds;
 				}
@@ -50,7 +50,7 @@ namespace Actively.Services.StatisticsCalculator
 			foreach (var slice in addActivityDto.Route) // calculate speeds
 			{
 				if (slice.Locations.Length == 0) continue;
-				var locations = slice.Locations;				
+				var locations = slice.Locations;
 
 				var vectorsToAverageOld = new Vector2(0.0f, 0.0f);
 
@@ -66,7 +66,7 @@ namespace Actively.Services.StatisticsCalculator
 						double averageTime = 0.0;
 						for (int j = 0; j < pointsInFragmentCount - 1; j++)
 						{
-							vectorsToAverage += LocationOperations.ProjectedDistance(locations[i+j], locations[i + j+1], DistanceUnit.Kilometers);
+							vectorsToAverage += LocationOperations.ProjectedDistance(locations[i + j], locations[i + j + 1], DistanceUnit.Kilometers);
 						}
 						averageTime = (locations[i + pointsInFragmentCount].TimeStamp - locations[i].TimeStamp).TotalHours;
 						distanceKm = (vectorsToAverage - vectorsToAverageOld).Length();
@@ -81,7 +81,7 @@ namespace Actively.Services.StatisticsCalculator
 					{
 						distanceKm = 0.0;
 					}
-		
+
 					if (speed > maxSpeed)
 					{
 						maxSpeed = speed;
@@ -179,9 +179,9 @@ namespace Actively.Services.StatisticsCalculator
 
 			double distance = 0;
 
-			foreach(var activity in activities)
+			foreach (var activity in activities)
 			{
-				distance+= activity.Distance;
+				distance += activity.Distance;
 			}
 
 			return distance;
@@ -198,7 +198,7 @@ namespace Actively.Services.StatisticsCalculator
 
 			int elevationGain = 0;
 
-			foreach(var activity in activities)
+			foreach (var activity in activities)
 			{
 				elevationGain += activity.SumOfAscent;
 			}

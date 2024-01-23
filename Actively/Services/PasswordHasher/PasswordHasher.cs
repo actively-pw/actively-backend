@@ -1,10 +1,11 @@
-﻿using Actively.Services.PasswordHasher.Interfaces;
+﻿using MyFitBook.Services.PasswordHasher.Interfaces;
 using System.Security.Cryptography;
 
-namespace Actively.Services.PasswordHasher
+namespace MyFitBook.Services.PasswordHasher
 {
 	/// <summary>
-	/// Helper class for hashing passwords
+	/// Helper class for hashing passwords.
+	/// Source: <see href="https://youtu.be/vspPrnZgSAc?si=xizX0wN8qSahBBSO"></see>
 	/// </summary>
 	public class PasswordHasher : IPasswordHasher
 	{

@@ -1,10 +1,10 @@
-﻿using Actively.Context;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MyFitBook.Context;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
 
-namespace Actively.Controllers.Repositories
+namespace MyFitBook.Controllers.Repositories
 {
 	/// <summary>
 	/// Class that contains operations related to database queries about users
@@ -18,9 +18,9 @@ namespace Actively.Controllers.Repositories
 		/// </summary>
 		/// <param name="context"></param>
 		public UserRepository(MyFitBookDbContext context)
-        {
-            _context = context;
-        }
+		{
+			_context = context;
+		}
 
 		/// <summary>
 		/// Returns user whose e-mail address is equal to provided <c>email</c> 

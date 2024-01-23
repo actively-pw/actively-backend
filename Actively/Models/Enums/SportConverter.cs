@@ -1,4 +1,4 @@
-﻿namespace Actively.Models.Enums
+﻿namespace MyFitBook.Models.Enums
 {
 	/// <summary>
 	/// Helper class for dealing with <c>Sport</c> enums
@@ -13,7 +13,7 @@
 		/// <exception cref="ArgumentException"></exception>
 		public static string SportToString(Sport sport)
 		{
-			switch(sport)
+			switch (sport)
 			{
 				case Sport.Run: return "Run";
 				case Sport.BicycleRide: return "Bicycle ride";

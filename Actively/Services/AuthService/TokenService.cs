@@ -1,16 +1,17 @@
-﻿using Actively.Context;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Services.AuthService.Configuration;
-using Actively.Services.AuthService.Interfaces;
+﻿using MyFitBook.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MyFitBook.Context;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Services.AuthService.Configuration;
+using MyFitBook.Services.AuthService.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Actively.Services.AuthService
+namespace MyFitBook.Services.AuthService
 {
 	/// <summary>
 	/// Class that provides basic operations on JWTs
@@ -52,7 +53,7 @@ namespace Actively.Services.AuthService
 				Token = jwt,
 				UserId = user.Id
 			};
-			
+
 			await _context.RefreshTokens.AddAsync(refreshToken);
 			await _context.SaveChangesAsync();
 

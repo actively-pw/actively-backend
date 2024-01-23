@@ -1,4 +1,4 @@
-﻿namespace Actively.Services.PolylineHelpers.Interfaces
+﻿namespace MyFitBook.Services.PolylineHelpers.Interfaces
 {
 	/// <summary>
 	/// Interface for classes that can encode polylines

@@ -1,4 +1,4 @@
-﻿namespace Actively.Models.DTOs.Statistics
+﻿namespace MyFitBook.Models.DTOs.Statistics
 {
 	public abstract class StatisticsDto
 	{

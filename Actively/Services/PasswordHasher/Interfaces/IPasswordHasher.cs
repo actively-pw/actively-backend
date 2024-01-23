@@ -1,4 +1,4 @@
-﻿namespace Actively.Services.PasswordHasher.Interfaces
+﻿namespace MyFitBook.Services.PasswordHasher.Interfaces
 {
 	/// <summary>
 	/// Interface for classes that hash and verify hashed text

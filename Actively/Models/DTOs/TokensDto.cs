@@ -1,4 +1,4 @@
-﻿namespace Actively.Models.DTOs
+﻿namespace MyFitBook.Models.DTOs
 {
 	public class TokensDto
 	{

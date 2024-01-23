@@ -1,17 +1,17 @@
-﻿using Actively.Models.Enums;
+﻿using MyFitBook.Models.Enums;
 
-namespace Actively.Models.DTOs
+namespace MyFitBook.Models.DTOs
 {
 	public class GetActivityDto
 	{
-		public Guid Id { get; set;}
-		public string? Title { get; set;}
-		public string Sport { get; set;}
-		public string Start { get; set;}
-		public Coordinates StartCoordinates { get; set;}
-		public Stats Stats { get; set;}
-		public string RouteUrl { get; set;}
-		public string LightStaticMapUrl { get; set;}
+		public Guid Id { get; set; }
+		public string? Title { get; set; }
+		public string Sport { get; set; }
+		public string Start { get; set; }
+		public Coordinates StartCoordinates { get; set; }
+		public Stats Stats { get; set; }
+		public string RouteUrl { get; set; }
+		public string LightStaticMapUrl { get; set; }
 		public string DarkStaticMapUrl { get; set; }
 		public GetActivityDto(Activity activity, StaticMap staticMapType)
 		{
@@ -23,7 +23,7 @@ namespace Actively.Models.DTOs
 			Stats = new Stats(activity.TotalTime, activity.Distance, activity.AverageSpeed);
 			RouteUrl = "https://actively.blob.core.windows.net/geojson-routes/" + Id.ToString() + ".geojson";
 			string containerLight, containerDark;
-			switch(staticMapType)
+			switch (staticMapType)
 			{
 				case StaticMap.Web:
 					containerLight = "static-maps-web-light";

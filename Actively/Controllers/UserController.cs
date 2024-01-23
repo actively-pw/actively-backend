@@ -1,16 +1,16 @@
-﻿using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Models.Enums;
-using Actively.Services.AuthService.Interfaces;
-using Actively.Services.PasswordHasher.Interfaces;
-using Actively.Services.StatisticsCalculator.Interfaces;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Models.Enums;
+using MyFitBook.Services.AuthService.Interfaces;
+using MyFitBook.Services.PasswordHasher.Interfaces;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
 using System.Net.Mime;
 
-namespace Actively.Controllers
+namespace MyFitBook.Controllers
 {
 
 	[Route("Users")]
@@ -49,7 +49,7 @@ namespace Actively.Controllers
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<ActionResult> RegisterUser([FromBody] RegisterUserDto registerUserDto)
 		{
-			if(await _userRepository.GetUserByEmailAsync(registerUserDto.Email) is not null)
+			if (await _userRepository.GetUserByEmailAsync(registerUserDto.Email) is not null)
 			{
 				return BadRequest("User with email " + registerUserDto.Email + " already exists.");
 			}
@@ -90,7 +90,7 @@ namespace Actively.Controllers
 		{
 			var user = await _userRepository.GetUserByEmailAsync(loginUserDto.Email);
 
-			if(user is null)
+			if (user is null)
 			{
 				return NotFound(
 					new
@@ -99,7 +99,7 @@ namespace Actively.Controllers
 					});
 			}
 
-			if(!_passwordHasher.Verify(user.Password, loginUserDto.Password))
+			if (!_passwordHasher.Verify(user.Password, loginUserDto.Password))
 			{
 				return Unauthorized(
 					new
@@ -110,7 +110,7 @@ namespace Actively.Controllers
 
 			var tokens = _tokenService.GetTokens(user, HttpContext.Connection.RemoteIpAddress.ToString());
 
-			if(tokens is null)
+			if (tokens is null)
 			{
 				return Unauthorized(
 					new
@@ -142,7 +142,7 @@ namespace Actively.Controllers
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		public async Task<ActionResult> RefreshToken([FromBody] TokensDto tokensDto)
 		{
-			if(!ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
 				return BadRequest(
 					new

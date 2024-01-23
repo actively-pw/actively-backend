@@ -1,25 +1,25 @@
-﻿using Actively.BlobStorage.Interfaces;
-using Actively.Controllers;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Services.AuthService.Interfaces;
-using Actively.Services.GeoJsonGenerator.Interfaces;
-using Actively.Services.StaticMapGenerator.Interfaces;
-using Actively.Services.StatisticsCalculator.Interfaces;
+﻿using MyFitBook.Controllers;
 using FakeItEasy;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using MyFitBook.BlobStorage.Interfaces;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Services.AuthService.Interfaces;
+using MyFitBook.Services.GeoJsonGenerator.Interfaces;
+using MyFitBook.Services.StaticMapGenerator.Interfaces;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace Actively.Tests.Controllers
+namespace MyFitBook.Tests.Controllers
 {
-    public class ActivityControllerTests
-    {
+	public class ActivityControllerTests
+	{
 		private readonly IActivityRepository _activityRepository;
 		private readonly IStorageManager _blobStorage;
 		private readonly IGeoJsonGenerator _geoJsonGenerator;
@@ -27,21 +27,21 @@ namespace Actively.Tests.Controllers
 		private readonly IStatisticsCalculator _statisticsCalculator;
 		private readonly ITokenService _tokenService;
 
-        public ActivityControllerTests()
-        {
-            _activityRepository = A.Fake<IActivityRepository>();
-            _blobStorage = A.Fake<IStorageManager>();
-            _geoJsonGenerator = A.Fake<IGeoJsonGenerator>();
+		public ActivityControllerTests()
+		{
+			_activityRepository = A.Fake<IActivityRepository>();
+			_blobStorage = A.Fake<IStorageManager>();
+			_geoJsonGenerator = A.Fake<IGeoJsonGenerator>();
 			_staticMapGenerator = A.Fake<IStaticMapGenerator>();
 			_statisticsCalculator = A.Fake<IStatisticsCalculator>();
 			_tokenService = A.Fake<ITokenService>();
-        }
+		}
 		[Fact]
-        public async Task GetAllActivities_ThereIsAtLeastOneActivity_ReturnsGetActivityDtoList()
-        {
+		public async Task GetAllActivities_ThereIsAtLeastOneActivity_ReturnsGetActivityDtoList()
+		{
 			//arrange
 			PaginationParams @params = A.Dummy<PaginationParams>();
-			List<Activity> activitiesList = new List<Activity>{ new Activity()};
+			List<Activity> activitiesList = new List<Activity> { new Activity() };
 			User user = A.Fake<User>();
 
 			var tokenHandler = new JwtSecurityTokenHandler();
@@ -96,17 +96,17 @@ namespace Actively.Tests.Controllers
 			var enumerable = objectResult.Value as IEnumerable<GetActivityDto>;
 
 			Assert.NotNull(objectResult);
-            Assert.IsType<ActionResult<List<GetActivityDto>>>(result);
-        }
+			Assert.IsType<ActionResult<List<GetActivityDto>>>(result);
+		}
 
-        [Theory]
-        [InlineData(1, 3, 5)]
+		[Theory]
+		[InlineData(1, 3, 5)]
 		[InlineData(2, 3, 5)]
 		[InlineData(2, 3, 10)]
 		[InlineData(4, 3, 10)]
 		[InlineData(5, 3, 10)]
-        public async Task GetAllActivities_NaturalNumberPaginationParams_CanPaginate(int page, int itemsPerPage, int itemsCount)
-        {
+		public async Task GetAllActivities_NaturalNumberPaginationParams_CanPaginate(int page, int itemsPerPage, int itemsCount)
+		{
 			//arrange
 			PaginationParams @params = new PaginationParams()
 			{
@@ -176,13 +176,13 @@ namespace Actively.Tests.Controllers
 			var objectResult = (ObjectResult)result.Result;
 			var enumerable = objectResult.Value as IEnumerable<GetActivityDto>;
 
-			if(page*itemsPerPage < itemsCount)
+			if (page * itemsPerPage < itemsCount)
 			{
 				Assert.Equal(enumerable.Count(), itemsPerPage);
 			}
 			else
 			{
-				Assert.Equal(enumerable.Count(), itemsCount - (page-1)*itemsPerPage > 0 ? itemsCount - (page - 1) * itemsPerPage : 0);
+				Assert.Equal(enumerable.Count(), itemsCount - (page - 1) * itemsPerPage > 0 ? itemsCount - (page - 1) * itemsPerPage : 0);
 			}
 		}
 
@@ -250,8 +250,8 @@ namespace Actively.Tests.Controllers
 		}
 
 		[Theory]
-		[InlineData(1,3,5,2)]
-		[InlineData(2,3,5,-1)]
+		[InlineData(1, 3, 5, 2)]
+		[InlineData(2, 3, 5, -1)]
 		public async Task GetAllActivities_CanCalculateNextPage(int page, int itemsPerPage, int itemsCount, int correctNextPage)
 		{
 			//arrange

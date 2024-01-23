@@ -1,20 +1,20 @@
-﻿using Actively.Context;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Models.Enums;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyFitBook.Context;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Models.Enums;
 
-namespace Actively.Controllers.Repositories
+namespace MyFitBook.Controllers.Repositories
 {
 	/// <summary>
 	/// Class that contains operations related to database queries about activities
 	/// </summary>
-    public class ActivityRepository : IActivityRepository
+	public class ActivityRepository : IActivityRepository
 	{
 		private readonly MyFitBookDbContext _context;
 
@@ -110,7 +110,7 @@ namespace Actively.Controllers.Repositories
 					throw new ArgumentException("Invalid operation - cannot modify identificators.");
 				}
 
-				if(!operation.path.Contains("Title") && !operation.path.Contains("title"))
+				if (!operation.path.Contains("Title") && !operation.path.Contains("title"))
 				{
 					throw new ArgumentException("Invalid operation - only Title can be modified (at least for now).");
 				}

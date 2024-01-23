@@ -1,11 +1,11 @@
-﻿using Actively.Models.DTOs;
-using Actively.Services.StaticMapGenerator.Configuration;
-using Actively.Services.StaticMapGenerator.Interfaces;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Services.StaticMapGenerator.Configuration;
+using MyFitBook.Services.StaticMapGenerator.Interfaces;
 using System.Net;
 using System.Web;
 
-namespace Actively.Services.StaticMapGenerator
+namespace MyFitBook.Services.StaticMapGenerator
 {
 	/// <summary>
 	/// Helper class for generating Mapbox static maps
@@ -72,8 +72,8 @@ namespace Actively.Services.StaticMapGenerator
 		/// <exception cref="WebException"></exception>
 		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded, bool darkMode)
 		{
-			string styleName = darkMode? _darkStyle : _lightStyle;
-			string lineColor = darkMode? _darkLineColor : _lightLineColor;
+			string styleName = darkMode ? _darkStyle : _lightStyle;
+			string lineColor = darkMode ? _darkLineColor : _lightLineColor;
 
 			string url = encoded ? $"mapbox/{styleName}/static/path-{_lineWidth}-{lineColor}({geojson})/auto/{width}x{height}?access_token={_config.StaticImagesToken}" :
 				$"mapbox/{styleName}/static/geojson({AddColorToGeojson(geojson, lineColor)})/auto/{width}x{height}?access_token={_config.StaticImagesToken}";

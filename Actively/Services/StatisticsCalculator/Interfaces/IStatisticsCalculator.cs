@@ -1,13 +1,13 @@
-﻿using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
+﻿using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
 
-namespace Actively.Services.StatisticsCalculator.Interfaces
+namespace MyFitBook.Services.StatisticsCalculator.Interfaces
 {
 	/// <summary>
 	/// Interface for classes that can be used for activity and summary statistics calculation
 	/// </summary>
-    public interface IStatisticsCalculator
+	public interface IStatisticsCalculator
 	{
 		ActivityStatistics Calculate(AddActivityDto addActivityDto);
 		(WeeklyStatisticsDto, YearToDateStatisticsDto, AllTimeStatisticsDto) CalculateSportSummary(List<Activity> weekActivities,

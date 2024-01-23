@@ -1,6 +1,6 @@
-﻿using Actively.Models.DTOs;
+﻿using MyFitBook.Models.DTOs;
 
-namespace Actively.Services.StaticMapGenerator.Interfaces
+namespace MyFitBook.Services.StaticMapGenerator.Interfaces
 {
 	/// <summary>
 	/// Interface for classes that generate static maps based on geojsons

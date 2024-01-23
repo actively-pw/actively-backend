@@ -1,4 +1,4 @@
-﻿namespace Actively.Services.StaticMapGenerator.Configuration
+﻿namespace MyFitBook.Services.StaticMapGenerator.Configuration
 {
 	/// <summary>
 	/// Class for storing Mapbox configuration data

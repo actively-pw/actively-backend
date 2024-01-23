@@ -1,4 +1,6 @@
-﻿namespace Actively.BlobStorage.Interfaces
+﻿using MyFitBook.BlobStorage;
+
+namespace MyFitBook.BlobStorage.Interfaces
 {
 	/// <summary>
 	/// Interface for Azure StorageAccount helper classes

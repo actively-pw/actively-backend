@@ -1,11 +1,11 @@
-﻿using Actively.Context;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MyFitBook.Context;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace Actively.Controllers.Repositories
+namespace MyFitBook.Controllers.Repositories
 {
 	/// <summary>
 	/// Class that contains operations related to database queries about refresh tokens
@@ -35,8 +35,8 @@ namespace Actively.Controllers.Repositories
 		public async Task<UserRefreshToken> InvalidateRefreshTokenAsync(string ipAddress, JwtSecurityToken jwt, TokensDto tokensDto)
 		{
 			// check if it is possible to refresh jwt
-			
-			if(jwt.ValidTo > DateTime.UtcNow)
+
+			if (jwt.ValidTo > DateTime.UtcNow)
 			{
 				throw new ArgumentException("Jwt has not expired yet");
 			}
@@ -51,7 +51,7 @@ namespace Actively.Controllers.Repositories
 				throw new ArgumentNullException("Invalid token details");
 			}
 
-			if(!refreshToken.isActive)
+			if (!refreshToken.isActive)
 			{
 				throw new ArgumentException("Refresh token is expired");
 			}

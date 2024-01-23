@@ -1,4 +1,4 @@
-﻿namespace Actively.Services.AuthService.Configuration
+﻿namespace MyFitBook.Services.AuthService.Configuration
 {
 	/// <summary>
 	/// Contains basic information about JWTs

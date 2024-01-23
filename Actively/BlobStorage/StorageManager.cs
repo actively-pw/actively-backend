@@ -1,7 +1,7 @@
-﻿using Actively.BlobStorage.Interfaces;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
+using MyFitBook.BlobStorage.Interfaces;
 
-namespace Actively.BlobStorage
+namespace MyFitBook.BlobStorage
 {
 	/// <summary>
 	/// Azure StorageAccount helper class that allows to upload and delete files
@@ -56,7 +56,7 @@ namespace Actively.BlobStorage
 		/// <returns></returns>
 		public async Task DeleteActivityBlobs(Guid activityId)
 		{
-			foreach(BlobType blobType in Enum.GetValues(typeof(BlobType)))
+			foreach (BlobType blobType in Enum.GetValues(typeof(BlobType)))
 			{
 				await DeleteBlob(activityId, blobType);
 			}
@@ -71,12 +71,12 @@ namespace Actively.BlobStorage
 		/// <exception cref="ArgumentException"></exception>
 		private BlobClient CreateBlob(Guid activityId, BlobType type)
 		{
-			if(!_fileExtensions.TryGetValue(type, out var fileExtension))
+			if (!_fileExtensions.TryGetValue(type, out var fileExtension))
 			{
 				throw new ArgumentException("Provided blob type is invalid");
 			}
 
-			if(!_containerNames.TryGetValue(type, out var containerName))
+			if (!_containerNames.TryGetValue(type, out var containerName))
 			{
 				throw new ArgumentException("Provided blob type is invalid");
 			}

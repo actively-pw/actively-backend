@@ -1,6 +1,7 @@
-﻿using Actively.Models.Enums;
+﻿using MyFitBook.Models;
+using MyFitBook.Models.Enums;
 
-namespace Actively.Models.DTOs
+namespace MyFitBook.Models.DTOs
 {
 	public class ActivityResponseDto
 	{

@@ -1,24 +1,24 @@
-﻿using Actively.BlobStorage;
-using Actively.BlobStorage.Interfaces;
-using Actively.Controllers.Repositories.Interfaces;
-using Actively.Models;
-using Actively.Models.DTOs;
-using Actively.Models.DTOs.Statistics;
-using Actively.Models.Enums;
-using Actively.Services.AuthService.Interfaces;
-using Actively.Services.GeoJsonGenerator.Interfaces;
-using Actively.Services.StaticMapGenerator.Interfaces;
-using Actively.Services.StatisticsCalculator.Interfaces;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using MyFitBook.BlobStorage;
+using MyFitBook.BlobStorage.Interfaces;
+using MyFitBook.Controllers.Repositories.Interfaces;
+using MyFitBook.Models;
+using MyFitBook.Models.DTOs;
+using MyFitBook.Models.DTOs.Statistics;
+using MyFitBook.Models.Enums;
+using MyFitBook.Services.AuthService.Interfaces;
+using MyFitBook.Services.GeoJsonGenerator.Interfaces;
+using MyFitBook.Services.StaticMapGenerator.Interfaces;
+using MyFitBook.Services.StatisticsCalculator.Interfaces;
 using System.Net.Mime;
 
-namespace Actively.Controllers
+namespace MyFitBook.Controllers
 {
 	[Authorize]
-    [Route("Activities")]
+	[Route("Activities")]
 	[Produces(MediaTypeNames.Application.Json)] // todo czy moze byc tak dla edit? patch
 	[Consumes(MediaTypeNames.Application.Json)]
 	[ApiController]
@@ -73,7 +73,7 @@ namespace Actively.Controllers
 				enumerable.Sort((a, b) => b.Start.CompareTo(a.Start));
 
 				StaticMap type;
-				switch(staticMapType)
+				switch (staticMapType)
 				{
 					case "web":
 						type = StaticMap.Web;

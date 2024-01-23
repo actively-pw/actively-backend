@@ -1,4 +1,4 @@
-﻿namespace Actively.BlobStorage
+﻿namespace MyFitBook.BlobStorage
 {
 	/// <summary>
 	/// Types of files that can be uploaded to Azure StorageAccount

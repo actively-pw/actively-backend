@@ -1,4 +1,4 @@
-﻿namespace Actively.Models.Enums
+﻿namespace MyFitBook.Models.Enums
 {
 	public enum Sport : byte
 	{

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 
-namespace Actively.Services.InputFormatters
+namespace MyFitBook.Services.InputFormatters
 {
 	/// <summary>
 	/// Helper class for <c>NewtonsoftJsonPatchInputFormatter</c> generation
