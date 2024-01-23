@@ -3,14 +3,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Actively.Context
 {
+	/// <summary>
+	/// Class that models Actively database
+	/// </summary>
 	public class ActivelyDbContext : DbContext
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ActivelyDbContext"/> class.
+		/// </summary>
+		/// <param name="options"></param>
 		public ActivelyDbContext(DbContextOptions options) : base(options)
 		{
 		}
 
+		/// <summary>
+		/// Property that models Activities table in Actively database
+		/// </summary>
 		public DbSet<Activity> Activities { get; set; }
+
+		/// <summary>
+		/// Property that models Users table in Actively database
+		/// </summary>
 		public DbSet<User> Users { get; set; }
+
+		/// <summary>
+		/// Property that models RefreshTokens table in Actively database
+		/// </summary>
 		public DbSet<UserRefreshToken> RefreshTokens { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

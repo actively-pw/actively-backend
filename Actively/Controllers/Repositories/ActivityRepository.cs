@@ -11,20 +11,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Actively.Controllers.Repositories
 {
+	/// <summary>
+	/// Class that contains operations related to database queries about activities
+	/// </summary>
     public class ActivityRepository : IActivityRepository
 	{
 		private readonly ActivelyDbContext _context;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ActivityRepository"/> class.
+		/// </summary>
+		/// <param name="context"></param>
 		public ActivityRepository(ActivelyDbContext context)
 		{
 			_context = context;
 		}
 
+		/// <summary>
+		/// Returns list of activities recorded by user whose <c>userId</c> is provided as the argument
+		/// </summary>
+		/// <param name="userId"></param>
+		/// <returns></returns>
 		public async Task<List<Activity>> GetActivitiesByUserId(Guid userId)
 		{
 			return await _context.Activities.Where(a => a.User.Id == userId).ToListAsync();
 		}
 
+		/// <summary>
+		/// Adds new activity recorded by user whose Id is equal to <c>userId</c>
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <param name="statistics"></param>
+		/// <param name="userId"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
 		public async Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics, Guid userId)
 		{
 			var user = _context.Users.Find(userId);
@@ -37,11 +57,22 @@ namespace Actively.Controllers.Repositories
 			return activity;
 		}
 
+		/// <summary>
+		/// Returns activity with Id equal to given argument
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		public async Task<Activity?> GetActivityById(Guid id)
 		{
 			return await _context.Activities.FirstOrDefaultAsync(a => a.Id == id);
 		}
 
+		/// <summary>
+		/// Deletes activity with Id equal to given argument
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		/// <exception cref="KeyNotFoundException"></exception>
 		public async Task<Activity> DeleteActivity(Guid id)
 		{
 			var result = _context.Activities.FirstOrDefault(a => a.Id == id);
@@ -53,6 +84,14 @@ namespace Actively.Controllers.Repositories
 			return result;
 		}
 
+		/// <summary>
+		/// Edits activity with Id equal to <c>id</c>
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="patchDoc"></param>
+		/// <returns></returns>
+		/// <exception cref="KeyNotFoundException"></exception>
+		/// <exception cref="ArgumentException"></exception>
 		public async Task<Activity> EditActivity(Guid id, [FromBody] JsonPatchDocument<Activity> patchDoc)
 		{
 			var result = await _context.Activities.SingleOrDefaultAsync(e => e.Id == id);
@@ -84,16 +123,34 @@ namespace Actively.Controllers.Repositories
 			return result;
 		}
 
+		/// <summary>
+		/// Returns total activities count
+		/// </summary>
+		/// <returns></returns>
 		public int GetActivitiesCount()
 		{
 			return _context.Activities.Count();
 		}
 
+		/// <summary>
+		/// Returns acitivities of given type <c>sport</c> recorded by user with Id equal to <c>userId</c>
+		/// </summary>
+		/// <param name="sport"></param>
+		/// <param name="userId"></param>
+		/// <returns></returns>
 		public async Task<List<Activity>> GetActivitiesBySport(Sport sport, Guid userId)
 		{
 			return await _context.Activities.Where(a => a.User.Id == userId && a.Sport == sport).ToListAsync();
 		}
 
+		/// <summary>
+		/// Returns acitivities of given type <c>sport</c>
+		/// recorded by user with Id equal to <c>userId</c> in the last <c>daysCount</c> days
+		/// </summary>
+		/// <param name="daysCount"></param>
+		/// <param name="sport"></param>
+		/// <param name="userId"></param>
+		/// <returns></returns>
 		public async Task<List<Activity>> GetLatestActivitiesByDaysCountAndSport(int daysCount, Sport sport, Guid userId)
 		{
 			return await _context.Activities

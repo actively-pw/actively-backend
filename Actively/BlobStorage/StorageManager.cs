@@ -3,6 +3,9 @@ using Azure.Storage.Blobs;
 
 namespace Actively.BlobStorage
 {
+	/// <summary>
+	/// Azure StorageAccount helper class that allows to upload and delete files
+	/// </summary>
 	public class StorageManager : IStorageManager
 	{
 		private readonly string _connectionString;
@@ -23,11 +26,22 @@ namespace Actively.BlobStorage
 			{BlobType.StaticMapMobileDark, "static-maps-mobile-dark" }
 		};
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StorageManager"/> class.
+		/// </summary>
+		/// <param name="configuration"></param>
 		public StorageManager(IConfiguration configuration)
 		{
 			_connectionString = configuration.GetSection("AzureBlob").Value!;
 		}
 
+		/// <summary>
+		/// Uploads a new file to StorageAccount
+		/// </summary>
+		/// <param name="activityId"></param>
+		/// <param name="type"></param>
+		/// <param name="content"></param>
+		/// <returns></returns>
 		public async Task Upload(Guid activityId, BlobType type, Stream content)
 		{
 			var blob = CreateBlob(activityId, type);
@@ -35,7 +49,11 @@ namespace Actively.BlobStorage
 			await blob.UploadAsync(content);
 		}
 
-		//deletes all blobs related to activity with given activityId
+		/// <summary>
+		/// Deletes all files related to activity with given <c>activityId</c>
+		/// </summary>
+		/// <param name="activityId"></param>
+		/// <returns></returns>
 		public async Task DeleteActivityBlobs(Guid activityId)
 		{
 			foreach(BlobType blobType in Enum.GetValues(typeof(BlobType)))
@@ -44,6 +62,13 @@ namespace Actively.BlobStorage
 			}
 		}
 
+		/// <summary>
+		/// Creates new blob client for a file of specified <c>type</c> related to activity given by <c>activityId</c>
+		/// </summary>
+		/// <param name="activityId"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
 		private BlobClient CreateBlob(Guid activityId, BlobType type)
 		{
 			if(!_fileExtensions.TryGetValue(type, out var fileExtension))
@@ -62,6 +87,13 @@ namespace Actively.BlobStorage
 			return containerClient.GetBlobClient(blobName);
 		}
 
+		/// <summary>
+		/// Deletes file specified by <c>type</c> and <c>activityId</c>
+		/// </summary>
+		/// <param name="activityId"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
 		private async Task DeleteBlob(Guid activityId, BlobType type)
 		{
 			if (!_fileExtensions.TryGetValue(type, out var fileExtension))

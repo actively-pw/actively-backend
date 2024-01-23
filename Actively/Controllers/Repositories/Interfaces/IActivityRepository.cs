@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Actively.Controllers.Repositories.Interfaces
 {
-    public interface IActivityRepository
+	/// <summary>
+	/// Interface for classes used for database management and queries related to activities
+	/// </summary>
+	public interface IActivityRepository
 	{
 		Task<List<Activity>> GetActivitiesByUserId(Guid userId);
 		Task<Activity> AddActivity(AddActivityDto addActivityDto, ActivityStatistics statistics, Guid userId);

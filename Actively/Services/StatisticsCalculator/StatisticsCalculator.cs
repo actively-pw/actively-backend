@@ -6,9 +6,18 @@ using System.Numerics;
 
 namespace Actively.Services.StatisticsCalculator
 {
+	/// <summary>
+	/// Helper class used for calculating activity and summary statistics
+	/// </summary>
     public class StatisticsCalculator : IStatisticsCalculator
 	{
 		private const int _defaultPointsInFragmentCount = 30;
+
+		/// <summary>
+		/// Calculates activity statistics
+		/// </summary>
+		/// <param name="addActivityDto"></param>
+		/// <returns></returns>
 		public ActivityStatistics Calculate(AddActivityDto addActivityDto)
 		{
 			var totalDistanceKilometers = 0.0;
@@ -105,6 +114,13 @@ namespace Actively.Services.StatisticsCalculator
 			);
 		}
 
+		/// <summary>
+		/// Calculates sport summary statistics
+		/// </summary>
+		/// <param name="lastWeekActivities"></param>
+		/// <param name="lastYearActivities"></param>
+		/// <param name="allTimeActivities"></param>
+		/// <returns></returns>
 		public (WeeklyStatisticsDto, YearToDateStatisticsDto, AllTimeStatisticsDto) CalculateSportSummary(List<Activity> lastWeekActivities,
 			List<Activity> lastYearActivities, List<Activity> allTimeActivities)
 		{
@@ -133,6 +149,11 @@ namespace Actively.Services.StatisticsCalculator
 			return (weekStatistics, yearStatistics, allTimeStatistics);
 		}
 
+		/// <summary>
+		/// Calculates total time of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private long CalculateTotalTime(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
@@ -147,6 +168,11 @@ namespace Actively.Services.StatisticsCalculator
 			return totalTime;
 		}
 
+		/// <summary>
+		/// Calculates total distance of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private double CalculateDistance(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
@@ -161,6 +187,11 @@ namespace Actively.Services.StatisticsCalculator
 			return distance;
 		}
 
+		/// <summary>
+		/// Calculates total elevation gain of provided activities
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private int CalculateElevationGain(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
@@ -175,12 +206,23 @@ namespace Actively.Services.StatisticsCalculator
 			return elevationGain;
 		}
 
+		/// <summary>
+		/// Returns distance of activity with the biggest distance
+		/// </summary>
+		/// <param name="activities"></param>
+		/// <returns></returns>
 		private double CalculateLongestDistance(List<Activity> activities)
 		{
 			if (!activities.Any()) return 0;
 			return activities.Max(a => a.Distance);
 		}
 
+		/// <summary>
+		/// Calculates average speed in km/h
+		/// </summary>
+		/// <param name="distanceMeters"></param>
+		/// <param name="durationMilliseconds"></param>
+		/// <returns></returns>
 		private double CalcAvgSpeed(double distanceMeters, double durationMilliseconds)
 		{
 			if (Math.Abs(durationMilliseconds) <= double.Epsilon) return 0.0;
@@ -190,6 +232,9 @@ namespace Actively.Services.StatisticsCalculator
 		}
 	}
 
+	/// <summary>
+	/// Helper class for basic <c>Location</c> operations
+	/// </summary>
 	public static class LocationOperations
 	{
 		private static readonly Dictionary<DistanceUnit, double> _factors = new()
@@ -198,6 +243,13 @@ namespace Actively.Services.StatisticsCalculator
 			{ DistanceUnit.Kilometers, 6373d },
 		};
 
+		/// <summary>
+		/// Calculates projected distance from <c>a</c> to <c>b</c> in provided <c>unit</c>
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <param name="unit"></param>
+		/// <returns></returns>
 		public static Vector2 ProjectedDistance(Location a, Location b, DistanceUnit unit)
 		{
 			double difLat = DegreesToRadians(b.Latitude - a.Latitude);

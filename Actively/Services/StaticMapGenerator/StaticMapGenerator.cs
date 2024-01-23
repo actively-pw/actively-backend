@@ -7,6 +7,9 @@ using System.Web;
 
 namespace Actively.Services.StaticMapGenerator
 {
+	/// <summary>
+	/// Helper class for generating Mapbox static maps
+	/// </summary>
 	public class StaticMapGenerator : IStaticMapGenerator
 	{
 		private readonly MapBoxConfig _config;
@@ -20,11 +23,21 @@ namespace Actively.Services.StaticMapGenerator
 		private readonly string _darkLineColor = "#fabc49";
 		private readonly int _lineWidth = 9;
 
-
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StaticMapGenerator"/> class.
+		/// </summary>
+		/// <param name="config"></param>
 		public StaticMapGenerator(IOptions<MapBoxConfig> config)
 		{
 			_config = config.Value;
 		}
+
+		/// <summary>
+		/// Generates Mapbox static maps based on provided geojson
+		/// </summary>
+		/// <param name="geojson"></param>
+		/// <param name="encoded"></param>
+		/// <returns></returns>
 		public async Task<StaticMapsDto> Generate(MemoryStream geojson, bool encoded)
 		{
 			using (var reader = new StreamReader(geojson))
@@ -47,6 +60,16 @@ namespace Actively.Services.StaticMapGenerator
 			}
 		}
 
+		/// <summary>
+		/// Generates static map based on provided geojson with style defined by the provided arguments
+		/// </summary>
+		/// <param name="geojson"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <param name="encoded"></param>
+		/// <param name="darkMode"></param>
+		/// <returns></returns>
+		/// <exception cref="WebException"></exception>
 		private async Task<Stream> GetStaticMap(string geojson, int width, int height, bool encoded, bool darkMode)
 		{
 			string styleName = darkMode? _darkStyle : _lightStyle;
@@ -68,6 +91,12 @@ namespace Actively.Services.StaticMapGenerator
 			}
 		}
 
+		/// <summary>
+		/// Adds line color information to provided geojson
+		/// </summary>
+		/// <param name="geojson"></param>
+		/// <param name="color"></param>
+		/// <returns></returns>
 		private string AddColorToGeojson(string geojson, string color)
 		{
 			geojson = "{\"type\":\"Feature\",\"geometry\":" + geojson;

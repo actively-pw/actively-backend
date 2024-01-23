@@ -1,5 +1,8 @@
 ﻿namespace Actively.Services.AuthService.Configuration
 {
+	/// <summary>
+	/// Contains basic information about JWTs
+	/// </summary>
 	public class JwtConfig
 	{
 		public string Issuer { get; set; }

@@ -1,7 +1,16 @@
 ﻿namespace Actively.Models.Enums
 {
+	/// <summary>
+	/// Helper class for dealing with <c>Sport</c> enums
+	/// </summary>
 	public static class SportConverter
 	{
+		/// <summary>
+		/// Converts <c>Sport</c> enum valur to string
+		/// </summary>
+		/// <param name="sport"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
 		public static string SportToString(Sport sport)
 		{
 			switch(sport)
@@ -13,6 +22,12 @@
 			}
 		}
 
+		/// <summary>
+		/// Converts string to <c>Sport</c> enum
+		/// </summary>
+		/// <param name="sport"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
 		public static Sport StringToSport(string sport)
 		{
 			sport = new string(sport.ToCharArray()

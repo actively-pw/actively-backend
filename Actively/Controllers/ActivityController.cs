@@ -30,6 +30,16 @@ namespace Actively.Controllers
 		private readonly IStaticMapGenerator _staticMapGenerator;
 		private readonly IStatisticsCalculator _statisticsCalculator;
 		private readonly ITokenService _tokenService;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ActivityController"/> class.
+		/// </summary>
+		/// <param name="activityRepository"></param>
+		/// <param name="blobStorage"></param>
+		/// <param name="geoJsonGenerator"></param>
+		/// <param name="staticMapGenerator"></param>
+		/// <param name="statisticsCalculator"></param>
+		/// <param name="tokenService"></param>
 		public ActivityController(IActivityRepository activityRepository, IStorageManager blobStorage, IGeoJsonGenerator geoJsonGenerator,
 			IStaticMapGenerator staticMapGenerator, IStatisticsCalculator statisticsCalculator, ITokenService tokenService)
 		{

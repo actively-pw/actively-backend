@@ -1,5 +1,8 @@
 ﻿namespace Actively.BlobStorage
 {
+	/// <summary>
+	/// Types of files that can be uploaded to Azure StorageAccount
+	/// </summary>
 	public enum BlobType
 	{
 		Geojson = 0,
